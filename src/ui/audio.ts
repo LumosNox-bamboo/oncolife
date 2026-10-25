@@ -1,0 +1,2 @@
+let context:AudioContext|undefined;let nodes:OscillatorNode[]=[];
+export function toggleAudio(on:boolean){if(!on){nodes.forEach(n=>n.stop());nodes=[];void context?.suspend();return;}context??=new AudioContext();void context.resume();const gain=context.createGain();gain.gain.value=.012;gain.connect(context.destination);[261.63,329.63,392].forEach(f=>{const o=context!.createOscillator();o.type='sine';o.frequency.value=f;o.connect(gain);o.start();nodes.push(o);});}
