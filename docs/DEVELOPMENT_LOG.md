@@ -61,3 +61,11 @@
 ## Git 快照
 
 以下提交摘要由实际提交后生成。
+
+- `32916dd` R1: initialize isolated OncoLife project
+- `00a2dc3` R2: add walkable pixel hospital and interactions
+- `7f2840e` R3: add shared roles tasks and persistence
+- `cb1eef9` R4: add fictional case and verified medical provenance
+- `67f3a31` R5: implement clinical time treatment and safety events
+- `b09dd88` R6: connect Chinese game interface and ambient audio
+- `1530cd1` R7: verify playable case and document V0.1 delivery
