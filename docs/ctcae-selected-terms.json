@@ -1,0 +1,37 @@
+[
+  [
+    "10016288",
+    "Blood and lymphatic system disorders",
+    "Febrile neutropenia",
+    " -",
+    " -",
+    "ANC <1000/mm3 with a single temperature of >38.3 degrees C (101 degrees F) or a sustained temperature of >=38 degrees C (100.4 degrees F) for more than one hour",
+    "Life-threatening consequences; urgent intervention indicated",
+    "Death",
+    "A disorder characterized by an ANC <1000/mm3 and a single temperature of >38.3 degrees C (101 degrees F) or a sustained temperature of >=38 degrees C (100.4 degrees F) for more than one hour"
+  ],
+  [
+    "10045271",
+    "Gastrointestinal disorders",
+    "Typhlitis",
+    " -",
+    " -",
+    "Symptomatic (e.g., abdominal pain, fever, change in bowel habits with ileus); peritoneal signs",
+    "Life-threatening consequences; urgent operative intervention indicated",
+    "Death",
+    "A disorder characterized by necrotizing enterocolitis in neutropenic patients.",
+    "Also report Investigations: Neutrophil count decreased",
+    "Addition: Navigational note; Clarification: Definition"
+  ],
+  [
+    "10029366",
+    "Investigations",
+    "Neutrophil count decreased",
+    "<LLN - 1500/mm3; <LLN - 1.5 x 10e9 /L",
+    "<1500 - 1000/mm3; <1.5 - 1.0 x 10e9 /L",
+    "<1000 - 500/mm3; <1.0 - 0.5 x 10e9 /L",
+    "<500/mm3; <0.5 x 10e9 /L",
+    " -",
+    "A finding based on laboratory test results that indicate a decrease in number of neutrophils in a blood specimen."
+  ]
+]
