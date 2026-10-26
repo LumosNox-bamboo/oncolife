@@ -110,7 +110,7 @@
       "line": 0,
       "specs": [
         {
-          "title": "真实键盘探索、完整病例与刷新续档",
+          "title": "医生线：3 分钟内首批线索，独立治疗异常与随访",
           "ok": true,
           "tags": [],
           "tests": [
@@ -125,12 +125,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 117373,
+                  "duration": 3406,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-25T15:08:02.078Z",
+                  "startTime": "2026-10-26T10:25:12.336Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -138,13 +138,81 @@
               "status": "expected"
             }
           ],
-          "id": "ab852d5c69103777c6b4-98daf384df716532a903",
+          "id": "ab852d5c69103777c6b4-818c4d0ca647b0282d0d",
+          "file": "playthrough.spec.ts",
+          "line": 13,
+          "column": 1
+        },
+        {
+          "title": "患者线：家庭支持、NPC 诊疗、求助高潮与日记结局",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2484,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-26T10:25:16.405Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ab852d5c69103777c6b4-c913b887cfdaadc70c11",
+          "file": "playthrough.spec.ts",
+          "line": 17,
+          "column": 1
+        },
+        {
+          "title": "第二检查路径与支持照护结局",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2143,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-26T10:25:18.897Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ab852d5c69103777c6b4-a4716347f5bd6c3ac318",
           "file": "playthrough.spec.ts",
           "line": 20,
           "column": 1
         },
         {
-          "title": "触屏布局与虚拟方向键",
+          "title": "真实行走、碰撞、自动寻路、任务直达与移动端",
           "ok": true,
           "tags": [],
           "tests": [
@@ -159,12 +227,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1368,
+                  "duration": 6933,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-25T15:10:00.066Z",
+                  "startTime": "2026-10-26T10:25:21.049Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -172,9 +240,43 @@
               "status": "expected"
             }
           ],
-          "id": "ab852d5c69103777c6b4-53ce8230bbe71183842a",
+          "id": "ab852d5c69103777c6b4-2bf89077f9973ebd9b11",
           "file": "playthrough.spec.ts",
-          "line": 33,
+          "line": 21,
+          "column": 1
+        },
+        {
+          "title": "患者支持路径、就医取舍、旧档保护与双槽位刷新",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2448,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-26T10:25:27.990Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ab852d5c69103777c6b4-9a6d72ef0e0237f05e27",
+          "file": "playthrough.spec.ts",
+          "line": 23,
           "column": 1
         }
       ]
@@ -182,9 +284,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-25T15:08:01.362Z",
-    "duration": 120176.781,
-    "expected": 2,
+    "startTime": "2026-10-26T10:25:11.603Z",
+    "duration": 18952.034,
+    "expected": 5,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0
