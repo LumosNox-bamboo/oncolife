@@ -44,3 +44,11 @@
 - 仅 Chrome 桌面与模拟窄屏验收，尚无真实手机硬件与 Safari／Firefox 全流程。
 - Phaser 主包仍有大于 500 KB 提示；本轮优先可玩性与流程，未扩大到构建优化。
 - 没有临床专家独立审核。教学指标和固定剧情不可外推真实结局。
+
+## 实际 Git 提交
+
+- `b0f6f0f` docs: audit V0.1 and preserve baseline evidence
+- `5beb547` feat: rebuild V0.2 as independent doctor and patient journeys
+- `f9f29c8` test: verify dual journeys choices navigation and save isolation
+
+验证结果：28/28 逻辑、5/5 浏览器通过，构建通过；完整记录见 V02_TEST_RESULTS.md。
