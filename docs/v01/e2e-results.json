@@ -1,0 +1,192 @@
+{
+  "config": {
+    "argv": [
+      "/opt/homebrew/Cellar/node/26.4.0/bin/node",
+      "/Users/lumosnox/个人相关 2/oncolife/node_modules/.bin/playwright",
+      "test"
+    ],
+    "configFile": "/Users/lumosnox/个人相关 2/oncolife/playwright.config.ts",
+    "rootDir": "/Users/lumosnox/个人相关 2/oncolife/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/lumosnox/个人相关 2/oncolife/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/Users/lumosnox/个人相关 2/oncolife/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "*.spec.ts"
+        ],
+        "timeout": 240000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/Users/lumosnox/个人相关 2/oncolife/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "/Users/lumosnox/个人相关 2/oncolife/tests",
+        "snapshotDir": "/Users/lumosnox/个人相关 2/oncolife/tests",
+        "testIgnore": [],
+        "testMatch": "*.spec.ts",
+        "timeout": 240000,
+        "use": {
+          "baseURL": "http://127.0.0.1:5188",
+          "viewport": {
+            "width": 1360,
+            "height": 1100
+          },
+          "launchOptions": {
+            "executablePath": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+            "args": [
+              "--no-sandbox"
+            ]
+          },
+          "screenshot": "only-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "docs/e2e-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://127.0.0.1:5188",
+      "reuseExistingServer": true
+    }
+  },
+  "suites": [
+    {
+      "title": "playthrough.spec.ts",
+      "file": "playthrough.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "真实键盘探索、完整病例与刷新续档",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 117894,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-26T10:04:46.415Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ab852d5c69103777c6b4-98daf384df716532a903",
+          "file": "playthrough.spec.ts",
+          "line": 20,
+          "column": 1
+        },
+        {
+          "title": "触屏布局与虚拟方向键",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1349,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-26T10:06:45.227Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ab852d5c69103777c6b4-53ce8230bbe71183842a",
+          "file": "playthrough.spec.ts",
+          "line": 33,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-26T10:04:45.749Z",
+    "duration": 120918.22799999999,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
