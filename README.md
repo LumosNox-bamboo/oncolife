@@ -15,7 +15,7 @@ npm run build
 npm run test:e2e
 ```
 
-也可运行 `bash scripts/install.sh` 和 `bash scripts/start.sh`。本地服务关闭后链接不可用，重新运行启动脚本即可。E2E 默认使用 macOS Google Chrome；其他系统请调整 `playwright.config.ts` 的 executablePath，或安装 Playwright Chromium。无真实患者数据、在线模型或云存档。
+也可运行 `bash scripts/install.sh` 和 `bash scripts/start.sh`。macOS 推荐 `bash scripts/start-background.sh`：由当前登录会话托管，退出聊天后仍运行，异常退出会重启；不设置开机自启，退出登录或重启电脑后需再次执行。停止服务用 `bash scripts/stop-background.sh`，日志位于 `.runtime/`。后台服务占用 5188 时无需再运行前台启动脚本。E2E 默认使用 macOS Google Chrome；其他系统请调整 `playwright.config.ts` 的 executablePath，或安装 Playwright Chromium。无真实患者数据、在线模型或云存档。
 
 ## 操作
 
