@@ -1,0 +1,13 @@
+export type Journey='doctor'|'patient';
+export type Mode='learning'|'gauntlet'|'challenge';
+export type CaseId='early-nsclc'|'locally-advanced'|'driver-positive'|'driver-negative'|'small-cell'|'recurrent';
+export type OrderStatus='ordered'|'scheduled'|'collected'|'processing'|'completed'|'cancelled'|'failed'|'insufficient_sample'|'recollection_required'|'refunded'|'partially_refunded';
+export type EventKind='appointment'|'report'|'administration'|'assessment'|'adverse'|'response'|'admission'|'discharge'|'communication'|'finance'|'progression'|'monitor';
+export type ClinicalEvent={id:string;kind:EventKind;caseId:CaseId;scheduledAt:number;availableAt:number;occurredAt?:number;acknowledgedAt?:number;completedAt?:number;priority:number;title:string;requiresAction:boolean;payload?:Record<string,string|number|boolean>};
+export type Order={id:string;testId:string;caseId:CaseId;status:OrderStatus;orderedAt:number;scheduledAt:number;collectedAt?:number;availableAt:number;completedAt?:number;attempt?:number;failureReason?:string;transactionId:string;refundTransactionId?:string;result?:string};
+export type Transaction={id:string;kind:'charge'|'refund';amount:number;day:number;description:string;relatedId?:string;settled:boolean};
+export type Admission={id:string;status:'requested'|'admitted'|'observing'|'discharged';requestedAt:number;admittedAt?:number;dischargedAt?:number;bed?:string;reason:string;notes:string[]};
+export type Regimen={id:string;name:string;cycleLength:number;cycles:number;administrationDays:number[];prechecks:string[];monitoringDays:number[];responseEvery:number;source:string;teachingPlaceholder?:boolean};
+export type Therapy={regimenId:string;startedAt:number;currentCycle:number;administrations:{cycle:number;day:number;scheduledAt:number;status:'scheduled'|'given'|'held'|'adjusted'}[];assessments:{cycle:number;scheduledAt:number;status:'pending'|'done';result?:string}[];decision?:'continue'|'hold'|'adjust'|'switch'|'stop'|'surveillance'};
+export type Score={safety:number;reasoning:number;appropriateness:number;resources:number;time:number;communication:number};
+export type GameState={version:3;journey:Journey;mode:Mode;caseId:CaseId;day:number;clock:{now:number;lastAdvance:number};phase:string;message:string;source:string;orders:Order[];events:ClinicalEvent[];transactions:Transaction[];balance:number;admissions:Admission[];therapy?:Therapy;level:number;unlocked:number;experience:{calm:number;fatigue:number;pressure:number};flags:string[];clues:string[];hypothesis:{disease:string;stage:string;reason:string};score:Score;resources:{beds:number;urgentSlots:number;infusionSlots:number};complete:boolean;outcome?:string;log:{day:number;choice:string;text:string;known:string[]}[]};

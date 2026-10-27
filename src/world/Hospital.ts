@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import {useGame} from '../engine/store';
+import {useV03 as useGame} from '../engine/v03-store';
 import {W,H,rooms,objects,walls,blocked,roomAt,destinations,findPath} from './map';
 export let activeScene: Hospital;
 export const controls={x:0,y:0,interact:false};
@@ -46,7 +46,7 @@ export class Hospital extends Phaser.Scene{
  if(dx||dy)this.route=[];
  if(this.route.length){const p=this.route[0];if(Math.hypot(p.x-this.px,p.y-this.py)<4){this.route.shift();}else{dx=p.x-this.px;dy=p.y-this.py;}}
  const n=Math.hypot(dx,dy);if(n){dx/=n;dy/=n;const step=Math.min(dt,35)*.15;const nx=this.px+dx*step,ny=this.py+dy*step;if(!blocked(nx,this.py))this.px=nx;if(!blocked(this.px,ny))this.py=ny;this.walking+=dt;}
- this.avatar.setPosition(Math.round(this.px),Math.round(this.py));const children=this.avatar.list as Phaser.GameObjects.Rectangle[];(children[3] as Phaser.GameObjects.Rectangle).setFillStyle(store.state.role==='doctor'?0xf9fcf1:0xd9a880);children[1].y=7+(n?Math.sin(this.walking/85)*3:0);children[2].y=7-(n?Math.sin(this.walking/85)*3:0);
+ this.avatar.setPosition(Math.round(this.px),Math.round(this.py));const children=this.avatar.list as Phaser.GameObjects.Rectangle[];(children[3] as Phaser.GameObjects.Rectangle).setFillStyle(store.state.journey==='doctor'?0xf9fcf1:0xd9a880);children[1].y=7+(n?Math.sin(this.walking/85)*3:0);children[2].y=7-(n?Math.sin(this.walking/85)*3:0);
  const room=roomAt(this.px,this.py);if(room!==this.lastRoom){store.setRoom(room);this.lastRoom=room;}
  const nearest=objects.find(o=>Math.hypot(o.x-this.px,o.y-this.py)<88);this.hint.setText(nearest?`E / 点击 · ${nearest.label}`:'WASD / 方向键移动 · 门口可以通行');
  if(controls.interact){controls.interact=false;if(nearest)store.open(nearest.id);}

@@ -1,0 +1,8 @@
+import {create} from 'zustand';
+import {CaseId,Journey,Mode,GameState} from './v03-types';
+import {initialV03,run} from './v03-engine';
+const key=(j:Journey,m:Mode,c:CaseId)=>`oncolife-v3-${j}-${m}-${c}`;
+function load(j:Journey,m:Mode,c:CaseId):GameState{try{const s=JSON.parse(localStorage.getItem(key(j,m,c))||'null');if(s?.version===3&&s.journey===j&&s.mode===m&&s.caseId===c&&s.experience&&Number.isFinite(s.balance))return s;}catch{}return initialV03(j,m,c);}
+function save(s:GameState){try{localStorage.setItem(key(s.journey,s.mode,s.caseId),JSON.stringify(s));return true;}catch{return false;}}
+type Store={state:GameState;menu:boolean;panel:string|null;room:string;notice:string;dispatch:(c:Parameters<typeof run>[1])=>void;enter:(j:Journey,mode?:Mode,caseId?:CaseId)=>void;open:(p:string|null)=>void;setRoom:(r:string)=>void;time:(d:number|'next')=>void;save:()=>void;mainMenu:()=>void;reset:()=>void};
+export const useV03=create<Store>((set,get)=>{const update=(s:GameState)=>{const ok=save(s);set({state:s,notice:ok?'V0.3 自动存档已更新':'保存失败，请检查浏览器存储'});};return {state:initialV03(),menu:true,panel:null,room:'医院大厅',notice:'医生与患者、病例和模式独立存档',dispatch:c=>update(run(get().state,c)),enter:(j,m='learning',c='driver-negative')=>{const s=load(j,m,c);set({state:s,menu:false,panel:null});save(s);},open:p=>set({panel:p==='scan'?'lab':p==='office'?'record':p==='lobby'?'clinic':p}),setRoom:r=>set({room:r}),time:d=>update(run(get().state,{type:'advance',days:d})),save:()=>set({notice:save(get().state)?'存档成功':'保存失败'}),mainMenu:()=>set({menu:true,panel:null}),reset:()=>update(initialV03(get().state.journey,get().state.mode,get().state.caseId))};});

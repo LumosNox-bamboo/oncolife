@@ -8,10 +8,10 @@ export const rooms=[
  {name:'治疗室',x:640,y:396,w:304,h:228,color:0xe6ede8,door:790,side:'bottom'}
 ];
 export const objects=[
- {id:'clinic',label:'林晓禾 · 门诊',x:164,y:128,room:'肿瘤科门诊',kind:'person'},
+ {id:'clinic',label:'患者 · 门诊',x:164,y:128,room:'肿瘤科门诊',kind:'person'},
  {id:'lab',label:'检验工作站',x:474,y:118,room:'检验科',kind:'computer'},
  {id:'scan',label:'影像工作站',x:794,y:128,room:'影像科',kind:'scanner'},
- {id:'ward',label:'林晓禾 · 床旁',x:164,y:512,room:'病房',kind:'bed'},
+ {id:'ward',label:'患者 · 床旁',x:164,y:512,room:'病房',kind:'bed'},
  {id:'office',label:'指南与会诊',x:474,y:512,room:'医生办公室',kind:'computer'},
  {id:'therapy',label:'医嘱核对台',x:794,y:512,room:'治疗室',kind:'computer'},
  {id:'lobby',label:'接待 · 家属与支持',x:478,y:306,room:'医院大厅',kind:'reception'}
