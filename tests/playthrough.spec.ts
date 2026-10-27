@@ -46,3 +46,12 @@ test('地图房间、移动碰撞、寻路、旧档保护和移动端',async({pa
 test('挑战多患者：共享预算、床位冲突与后台报告暂停',async({page})=>{
  await start(page,'doctor','challenge');await go(page,'lab');await button(page,'申请增强 CT').click();await go(page,'ward');await button(page,'申请住院评估').click();await button(page,'办理入院').click();await button(page,'完成入院评估').click();await close(page);await page.getByLabel('当前患者').selectOption('early-nsclc');await go(page,'ward');await button(page,'申请住院评估').click();await button(page,'办理入院').click();await expect(page.locator('.feedback')).toContainText('床位不足');await next(page);expect((await state(page,'doctor','challenge','early-nsclc')).day).toBe(2);await next(page);expect((await state(page,'doctor','challenge','early-nsclc')).day).toBe(2);await page.getByLabel('当前患者').selectOption('driver-negative');await confirmReports(page);expect((await state(page,'doctor','challenge')).balance).toBe(4600);
 });
+test('具体病历：问诊数值、分项报告解锁及报告档案',async({page})=>{
+ await start(page);await go(page,'clinic');const sheet=page.getByRole('region',{name:'结构化病历'});
+ await expect(sheet).toContainText('128/78 mmHg');await expect(sheet).not.toContainText('3.6 cm');
+ await button(page,'症状与持续时间').click();await button(page,'危险因素与家族史').click();await button(page,'既往史与用药').click();await button(page,'体格检查').click();await button(page,'患者目标与意愿').click();
+ await expect(sheet).toContainText('20 包年');await expect(sheet).toContainText('ECOG 1');await page.screenshot({path:'docs/v03-case-record-restored.png',fullPage:true});
+ await order(page,'增强 CT');await expect(page.getByRole('dialog')).toContainText('3.6 cm');await expect(page.getByRole('dialog')).not.toContainText('TPS 10%');
+ await go(page,'office');await page.getByText('检查档案 · 已查看 1 份（按日期保留）',{exact:true}).click();await expect(page.getByRole('region',{name:'结构化病历'})).toContainText('3.6 cm');await expect(page.getByRole('region',{name:'结构化病历'})).not.toContainText('脑 MRI');
+ await order(page,'脑 MRI');await go(page,'office');await page.getByText('检查档案 · 已查看 2 份（按日期保留）',{exact:true}).click();await expect(page.getByRole('region',{name:'结构化病历'})).toContainText('未见颅内转移');const before=await state(page);await page.reload();await page.getByRole('button',{name:/医生模式 Clinical/}).click();expect(await state(page)).toEqual(before);
+});

@@ -1,4 +1,6 @@
 import {cases} from '../medical/cases';
+import {caseReport,profiles,labText} from '../medical/profiles';
+import {interviewText,reportRead,orderRead} from './clinical-record';
 import {CaseId,GameState,Journey,Mode,ClinicalEvent} from './v03-types';
 import {base,applyOrder,regimenTherapy,testInfo,costs} from './v03-cases';
 import {advanceClock,advanceToNext,acknowledge,nextEvent} from './v03-clock';
@@ -9,8 +11,8 @@ export type Command={type:'case';caseId:CaseId}|{type:'mode';mode:Mode}|{type:'c
 export function teachingDraw(seed:number){let x=seed|0;x^=x<<13;x^=x>>>17;x^=x<<5;return (x>>>0)/4294967296;}
 export const initialV03=(journey:Journey='doctor',mode:Mode='learning',caseId:CaseId='driver-negative')=>base(caseId,journey,mode);
 const mark=(s:GameState,x:string)=>{if(!s.flags.includes(x))s.flags.push(x);};
-const say=(s:GameState,text:string,choice='系统',source='虚构教学规则')=>{s.message=text;s.source=source;s.log.push({day:s.day,choice,text,known:[...s.clues,...s.orders.filter(o=>read(s,o.testId)).map(o=>o.result||'')]});return s;};
-export const read=(s:GameState,id:string)=>s.orders.some(o=>o.testId===id&&o.status==='completed'&&s.events.some(e=>e.id===`report:${o.id}:${o.attempt||0}`&&e.completedAt!==undefined));
+const say=(s:GameState,text:string,choice='系统',source='虚构教学规则')=>{s.message=text;s.source=source;s.log.push({day:s.day,choice,text,known:[...s.clues,...s.orders.filter(o=>orderRead(s,o)).map(o=>o.result||'')]});return s;};
+export const read=reportRead;
 const done=(s:GameState,id:string)=>{const e=s.events.find(e=>e.id===id);if(e){e.occurredAt??=s.day;e.acknowledgedAt=s.day;e.completedAt=s.day;e.requiresAction=false;}};
 const event=(s:GameState,id:string,kind:ClinicalEvent['kind'],day:number,title:string,priority=3)=>{if(!s.events.some(e=>e.id===id))s.events.push({id,kind,caseId:s.caseId,scheduledAt:day,availableAt:day,title,priority,requiresAction:true});};
 const unresolved=(s:GameState)=>s.events.some(e=>e.kind==='adverse'&&e.availableAt<=s.day&&e.completedAt===undefined);
@@ -18,10 +20,10 @@ function sync(s:GameState){
  for(const o of s.orders){if(!['ordered','scheduled','collected','processing'].includes(o.status))continue;
   if(s.day>=o.scheduledAt){o.collectedAt??=o.scheduledAt;o.status='processing';}
   if(s.day<o.availableAt)continue;
-  const c=cases[s.caseId];o.completedAt=o.availableAt;
+  o.completedAt=o.availableAt;
   if(o.testId==='needle'&&!o.attempt){o.status='insufficient_sample';o.failureReason='固定教学剧情：样本不足，不代表真实失败率。';}
   else if(o.testId==='molecular'&&s.mode==='challenge'&&!o.attempt){o.status='failed';o.failureReason='固定教学剧情：实验室技术失败，可免费重做或全额退款。';}
-  else {o.status='completed';o.result=o.testId==='pathology'?c.diagnosis.pathology+'；组织类型：'+c.diagnosis.disease:o.testId==='molecular'?c.diagnosis.molecular:o.testId==='ct'?testInfo.ct.result+'；本病例分期线索：'+c.diagnosis.stage:testInfo[o.testId].result;}
+  else {o.status='completed';o.result=caseReport(s.caseId,o.testId)||testInfo[o.testId].result;o.reportContentVersion=1;}
  }
  const e=nextEvent(s);return say(s,e?`第 ${s.day} 天：${e.availableAt<=s.day?'待处理':'下次预约'} · ${e.title}`:'暂无未处理预约，请继续决策。','推进临床时间');
 }
@@ -46,9 +48,8 @@ export function run(before:GameState,c:Command):GameState{
   return say(s,`已查看：${e.title}`,'查看事件',e.kind==='report'?'ng122':'教学规则');
  }
  if(c.type==='clue'){
-  if(s.flags.includes(c.id))return say(s,'该对话已读，可直接跳过。');mark(s,c.id);
-  const text:Record<string,string>={symptoms:def.patient.symptoms,clue:def.patient.symptoms,risk:'询问吸烟、暴露及家族史。危险因素不能替代诊断。',history:def.patient.history,exam:'已完成体格检查与生命体征核对；正常体征不能排除恶性病变。',goal:def.patient.goal+' '+def.patient.finance};
-  s.clues.push(text[c.id]||c.id);s.score.communication+=2;return say(s,text[c.id]||c.id,'问诊','ng122');
+  if(s.flags.includes(c.id))return say(s,'已记录：'+interviewText(s,c.id),'回看问诊','case');mark(s,c.id);
+  const text=interviewText(s,c.id);s.clues.push(text);s.score.communication+=2;return say(s,text,'问诊','case');
  }
  if(c.type==='order'){
   if(s.journey==='patient')return say(s,'患者不能开医嘱，请通过就医与知情同意安排检查。');
@@ -155,10 +156,11 @@ function therapy(s:GameState,a:Extract<Command,{type:'therapy'}>['action']){
   if(!s.orders.some(o=>o.id===id)){
    if(s.mode!=='learning'&&s.balance<120)return say(s,'当日复查需 120 游戏币，预算不足可申请援助。');
    s=charge(s,`charge:${id}`,120,'治疗日血液／肾功能复查（教学即时出报告）',id);
-   s.orders.push({id,caseId:s.caseId,testId:'blood',status:'completed',orderedAt:s.day,scheduledAt:s.day,collectedAt:s.day,availableAt:s.day,completedAt:s.day,transactionId:`charge:${id}`,result:'当日教学固定值：ANC 3.2×10⁹/L，血小板 210×10⁹/L，CrCl 82 mL/min；非真实恢复预测。'});
+   s.orders.push({id,caseId:s.caseId,testId:'blood',status:'completed',orderedAt:s.day,scheduledAt:s.day,collectedAt:s.day,availableAt:s.day,completedAt:s.day,transactionId:`charge:${id}`,result:'当日复查（虚构教学样本）：'+labText(s.caseId),reportContentVersion:1});
    event(s,`report:${id}:0`,'report',s.day,'治疗日复查与核对',1);done(s,`report:${id}:0`);
   }
-  if(!safeToTreat(3.2,210,82))return say(s,'实验室值不满足标签门槛。','安全阻断','label');
+  const lab=profiles[s.caseId].labs;
+  if(!safeToTreat(lab.anc,lab.platelets,lab.crcl))return say(s,'实验室值不满足标签门槛。','安全阻断','label');
   mark(s,'prepared:'+next.cycle+':'+s.day);return say(s,'当日复查并核对血液、器官功能、非血液毒性和意愿。培美曲塞路径要求提前叶酸、B12、预处理及联合药物核对。自动检测数值为固定剧情，真实诊疗仍需完整评估。','安全复核','label');
  }
  if(a==='give'){
@@ -183,7 +185,7 @@ function therapy(s:GameState,a:Extract<Command,{type:'therapy'}>['action']){
  }
  const ass=t.assessments.find(x=>x.status==='pending');if(!ass||ass.scheduledAt>s.day)return say(s,'尚无到期周期评估。');
  if(t.administrations.some(x=>x.cycle===ass.cycle&&x.status!=='given')||unresolved(s))return say(s,'本周期治疗或急性事件仍未完成。');
- ass.status='done';ass.result='综合症状、毒性、意愿与病例影像；固定叙事结果不推断真实疗效。';done(s,`assessment:${ass.cycle}`);s.score.safety+=3;
+ ass.status='done';ass.result=`第 ${ass.cycle} 周期：已完成 ${t.administrations.filter(x=>x.cycle===ass.cycle&&x.status==='given').length} 个治疗节点。最近治疗日血液复查：${labText(s.caseId)} ${s.flags.includes('acute-treated')?'既往发热异常已处置，后续仍需警惕感染。':''} 本次未新增影像测量，不能据此判定客观缓解。`;done(s,`assessment:${ass.cycle}`);s.score.safety+=3;
  if(t.assessments.every(x=>x.status==='done')){s.phase='疗程后随访';event(s,'surveillance','appointment',s.day+7,'疗程后影像、毒性与生活目标随访');}return say(s,ass.result,'周期评估',r.source);
 }
 export const nextAttention=(s:GameState)=>{const e=nextEvent(s);return e&&['adverse','finance'].includes(e.kind)&&e.availableAt>s.day?s.events.filter(x=>!['adverse','finance'].includes(x.kind)&&x.requiresAction&&x.completedAt===undefined).sort((a,b)=>a.availableAt-b.availableAt)[0]:e;};
