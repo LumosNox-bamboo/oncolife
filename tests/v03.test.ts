@@ -15,7 +15,7 @@ function finish(s:GameState){for(let i=0;i<100&&!s.complete;i++){
  if(e.kind==='administration'){s=action(s,'therapy',{action:'prepare'});s=action(s,'therapy',{action:'give'});}
  else if(e.kind==='assessment')s=action(s,'therapy',{action:'response'});
  else if(e.kind==='adverse'){s=action(s,'adverse',{action:'assess'});s=action(s,'adverse',{action:'investigate'});s=action(s,'adverse',{action:'treat'});}
- else s=action(s,'ack',{id:e.id});
+ else if(e.kind==='finance')s=action(s,'life',{choice:'transport'});else s=action(s,'ack',{id:e.id});
  }return s;}
 describe('V0.3 P0 regressions',()=>{
  it('reports generated on available date; all time buttons stop until acknowledged',()=>{let s=action(initialV03(),'order',{testId:'ct'});s=action(s,'advance',{days:7});expect(s.day).toBe(2);expect(s.orders[0].result).toContain('分期线索');expect(s.events[0].occurredAt).toBe(2);for(const days of ['next',1,7]){s=action(s,'advance',{days});expect(s.day).toBe(2);}s=action(s,'ack',{id:s.events[0].id});expect(s.events[0].acknowledgedAt).toBe(2);});
@@ -33,3 +33,26 @@ describe('V0.3 P0 regressions',()=>{
  it('patient story completes independently with NPC evidence-driven plan',()=>{let s=initialV03('patient');s=action(s,'patient',{action:'describe'});s=action(s,'patient',{action:'family'});s=action(s,'patient',{action:'visit'});s=reports(s);for(let i=0;i<5;i++){s=action(s,'patient',{action:'consent'});s=reports(s);}expect(s.therapy).toBeDefined();s=finish(s);expect(s.complete,s.message).toBe(true);});
  it('six gauntlet objectives unlock sequentially',()=>{let s=ready('gauntlet');for(let i=1;i<=3;i++){expect(levelReady(s)).toBe(true);s=action(s,'level');}s=finish(s);for(let i=4;i<=6;i++){expect(levelReady(s)).toBe(true);s=action(s,'level');}expect(s.unlocked).toBe(6);});
 });
+
+import {campaign,campaignRun,selectPatient} from '../src/engine/v03-campaign';
+describe('shared challenge campaign',()=>{
+ it('patients share budget and one bed, cannot reserve occupied resources twice',()=>{
+  let p=campaign('doctor');p=campaignRun(p,{type:'order',testId:'ct'});expect(p.balance).toBe(4600);
+  p=campaignRun(p,{type:'admission',action:'request'});p=campaignRun(p,{type:'admission',action:'admit'});
+  p=selectPatient(p,'early-nsclc');expect(p.patients['early-nsclc']!.balance).toBe(4600);
+  p=campaignRun(p,{type:'admission',action:'request'});p=campaignRun(p,{type:'admission',action:'admit'});
+  expect(p.patients['early-nsclc']!.admissions[0].status).toBe('requested');expect(p.resources.beds).toBe(0);
+ });
+ it('inactive patient events update and pause shared time',()=>{
+  let p=campaignRun(campaign('doctor'),{type:'order',testId:'ct'});p=selectPatient(p,'early-nsclc');p=campaignRun(p,{type:'advance',days:7});
+  expect(p.day).toBe(2);expect(p.patients['driver-negative']!.orders[0].status).toBe('completed');p=campaignRun(p,{type:'advance',days:7});expect(p.day).toBe(2);
+  p=selectPatient(p,'driver-negative');p=campaignRun(p,{type:'ack',id:'report:ord-1:0'});p=campaignRun(p,{type:'advance',days:1});expect(p.day).toBe(3);
+ });
+});
+import {validateCases} from '../src/medical/validate';
+import {teachingDraw} from '../src/engine/v03-engine';
+it('medical content passes structural checks; seeded story is repeatable',()=>{expect(validateCases()).toEqual([]);expect(teachingDraw(2026)).toBe(teachingDraw(2026));expect(teachingDraw(2026)).not.toBe(teachingDraw(2030));});
+it('technical refunds link original charge and never exceed payment',()=>{
+ let s=initialV03('doctor','challenge');for(const testId of ['ct','pleura','pathology','molecular'])s=reports(action(s,'order',{testId}));const o=s.orders.at(-1)!;expect(o.status).toBe('failed');s=action(s,'orderAction',{action:'refund',orderId:o.id});const balance=s.balance;s=action(s,'orderAction',{action:'refund',orderId:o.id});expect(s.balance).toBe(balance);const refund=s.transactions.find(t=>t.kind==='refund')!;expect(refund.relatedId).toBe(o.transactionId);expect(refund.amount).toBe(620);s=action(s,'orderAction',{action:'recollect',orderId:o.id});expect(s.orders.at(-1)!.status).toBe('failed');
+});
+it('revising a diagnosis revokes treatment authorization until resubmitted',()=>{let s=ready();s=action(s,'diagnosis',{disease:'感染性病变',stage:'待定',reason:'修订',submit:false});expect(s.flags).not.toContain('diagnosis');s=action(s,'advance',{days:'next'});s=action(s,'therapy',{action:'give'});expect(s.therapy!.administrations[0].status).toBe('scheduled');});

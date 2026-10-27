@@ -9,3 +9,14 @@
 - 失败修复：原有长单行源码使精确 patch 匹配失败，按函数边界重写；随后构建与 42 项逻辑测试通过。
 - 当前限制：非默认方案仅为管理教学节点，不提供可执行处方；完整多患者资源共享仍待实现。
 - 本阶段提交：见 Git 日志 `feat: connect V0.3 clock ledger admissions and multi-cycle journeys`。
+
+## 阶段 4–6：病例、模式、共享资源
+- 六病例从结构化数据生成不同取样候选、分期／分子证据、治疗教学日程及终点；追加一致性校验，禁止小细胞复用培美曲塞方案。
+- 学习不限预算；六个顺序解锁能力目标；挑战共享预算／时钟／床位／当日加急与治疗资源。
+- 多患者管理：后台患者继续更新，到期未处理事件会阻止全院时间越过。患者选择不会创建新的免费预算。
+- 固定医疗剧情与种子化交通生活事件分离。交通选择真实改变账本和疲劳，不映射真实医学预后。
+- 治疗前 NPC 当日血液／肾功能复查，游戏即时出报告；相同患者／周期／日重复复核不重复收费，旧报告不充当当天检查。
+- 存档按主线／模式／病例隔离；挑战增加共享 campaign 档；旧 V0.1、V0.2 键不写入，可下载保留档。
+- 浏览器首轮三条完整疗程通过，地图测试失败是动态导入形成重复模块单例；改用真实 canvas 位置信息断言，五条流程随后通过。
+- 变更涉及 v03-campaign、v03-store、v03-engine、medical/cases、medical/validate、main、V03Panel、Hospital，以及 tests/v03、tests/playthrough。
+- 提交见 Git 日志 `feat: add shared challenge campaign case validation and playable modes`。

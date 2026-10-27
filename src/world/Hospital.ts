@@ -1,10 +1,12 @@
 import Phaser from 'phaser';
+import {cases} from '../medical/cases';
 import {useV03 as useGame} from '../engine/v03-store';
 import {W,H,rooms,objects,walls,blocked,roomAt,destinations,findPath} from './map';
 export let activeScene: Hospital;
 export const controls={x:0,y:0,interact:false};
 export class Hospital extends Phaser.Scene{
  px=350;py=325;keys!:Record<string,Phaser.Input.Keyboard.Key>;avatar!:Phaser.GameObjects.Container;hint!:Phaser.GameObjects.Text;walking=0;lastRoom='';
+ patientMarker!:Phaser.GameObjects.Text;
  route:{x:number;y:number}[]=[];
  travel(id:string,walk=false){const target=destinations[id];if(!target)return;useGame.getState().open(null);if(walk){this.route=findPath({x:this.px,y:this.py},target);useGame.setState({notice:this.route.length?'正在自动寻路；方向键可取消':'路线不可达，请使用快速旅行'});}else{this.route=[];this.px=target.x;this.py=target.y;useGame.getState().setRoom(roomAt(this.px,this.py));}}
  constructor(){super('hospital');}
@@ -23,13 +25,14 @@ export class Hospital extends Phaser.Scene{
  objects.forEach(o=>{
  const x=o.x,y=o.y;
  g.fillStyle(0x6a8176,0.2).fillEllipse(x,y+20,64,16);
- if(o.kind==='bed'){g.fillStyle(0x829e99).fillRect(x-30,y-22,60,48);g.fillStyle(0xfefcf1).fillRect(x-27,y-20,54,14);g.fillStyle(0xa0c4b6).fillRect(x-27,y-3,54,26);g.fillStyle(0xe2b790).fillRect(x-8,y-17,16,14);}
+ if(o.kind==='bed'){g.fillStyle(0x829e99).fillRect(x-30,y-22,60,48);g.fillStyle(0xfefcf1).fillRect(x-27,y-20,54,14);g.fillStyle(0xa0c4b6).fillRect(x-27,y-3,54,26);}
  else if(o.kind==='person'){g.fillStyle(0xc49a79).fillRect(x-30,y+2,60,20);this.npc(x,y-12,0xb58477);}
  else if(o.kind==='scanner'){g.fillStyle(0x9faeb9).fillRect(x-32,y-28,64,48);g.fillStyle(0xf9fff9).fillRect(x-25,y-22,50,36);g.fillStyle(0x637c8e).fillRect(x-15,y-16,30,26);g.fillStyle(0xc2d6df).fillRect(x-11,y+3,22,34);}
  else {g.fillStyle(0x967d62).fillRect(x-30,y,60,24);g.fillStyle(0xc4ad86).fillRect(x-32,y-3,64,9);g.fillStyle(0x486869).fillRect(x-17,y-26,34,25);g.fillStyle(0xa5d9cc).fillRect(x-13,y-22,26,17);g.fillStyle(0xe5f6de).fillRect(x-10,y-19,17,3);}
  this.add.text(x,y+39,o.label,{fontSize:'12px',color:'#395e56',backgroundColor:'#ffffffa0',padding:{x:4,y:3}}).setOrigin(.5);
  this.add.zone(x,y,88,90).setInteractive({useHandCursor:true}).on('pointerdown',()=>{if(Math.hypot(this.px-x,this.py-y)<100)useGame.getState().open(o.id);else useGame.setState({notice:'请先走近目标，再点击或按 E 互动。'});});
  });
+ this.patientMarker=this.add.text(220,180,'',{fontSize:'12px',color:'#305d47',backgroundColor:'#faffed',padding:{x:4,y:3}}).setDepth(12);
  this.npc(575,330,0xe2efef);this.npc(255,470,0x8cb3bd);
  const shadow=this.add.ellipse(0,7,24,9,0x456858,.25);const body=this.add.rectangle(0,-7,16,21,0xf7faf0);const head=this.add.rectangle(0,-26,14,14,0xe8bf99);const hair=this.add.rectangle(0,-33,16,6,0x4d5045);const leg1=this.add.rectangle(-5,7,5,11,0x455f6c);const leg2=this.add.rectangle(5,7,5,11,0x455f6c);const cross=this.add.text(-4,-16,'+',{fontSize:'12px',color:'#cf7966'});
  this.avatar=this.add.container(this.px,this.py,[shadow,leg1,leg2,body,head,hair,cross]).setDepth(10);
@@ -41,11 +44,12 @@ export class Hospital extends Phaser.Scene{
  interact(){const nearest=objects.find(o=>Math.hypot(o.x-this.px,o.y-this.py)<88);if(nearest)useGame.getState().open(nearest.id);}
  npc(x:number,y:number,color:number){const g=this.add.graphics();g.fillStyle(0x57746b).fillRect(x-7,y+8,5,12).fillRect(x+2,y+8,5,12);g.fillStyle(color).fillRect(x-10,y-10,20,22);g.fillStyle(0xe4bc99).fillRect(x-7,y-24,14,14);g.fillStyle(0x555647).fillRect(x-8,y-27,16,6);}
  update(_:number,dt:number){
- if(!this.keys)return;const store=useGame.getState();if(store.panel||store.menu){this.route=[];controls.x=0;controls.y=0;controls.interact=false;return;}
+ if(!this.keys)return;const store=useGame.getState();const inpatient=store.state.admissions.some(a=>a.status==='admitted'||a.status==='observing');this.patientMarker.setPosition(175,inpatient?460:185).setText('● '+cases[store.state.caseId].title.split(' · ')[0]+' · '+(inpatient?'住院':'门诊'));if(store.panel||store.menu){this.route=[];controls.x=0;controls.y=0;controls.interact=false;return;}
  let dx=Number(this.keys.D.isDown||this.keys.RIGHT.isDown)-Number(this.keys.A.isDown||this.keys.LEFT.isDown)+controls.x;let dy=Number(this.keys.S.isDown||this.keys.DOWN.isDown)-Number(this.keys.W.isDown||this.keys.UP.isDown)+controls.y;
  if(dx||dy)this.route=[];
  if(this.route.length){const p=this.route[0];if(Math.hypot(p.x-this.px,p.y-this.py)<4){this.route.shift();}else{dx=p.x-this.px;dy=p.y-this.py;}}
  const n=Math.hypot(dx,dy);if(n){dx/=n;dy/=n;const step=Math.min(dt,35)*.15;const nx=this.px+dx*step,ny=this.py+dy*step;if(!blocked(nx,this.py))this.px=nx;if(!blocked(this.px,ny))this.py=ny;this.walking+=dt;}
+ this.game.canvas.dataset.playerX=String(this.px);this.game.canvas.dataset.playerY=String(this.py);this.game.canvas.dataset.routeLength=String(this.route.length);
  this.avatar.setPosition(Math.round(this.px),Math.round(this.py));const children=this.avatar.list as Phaser.GameObjects.Rectangle[];(children[3] as Phaser.GameObjects.Rectangle).setFillStyle(store.state.journey==='doctor'?0xf9fcf1:0xd9a880);children[1].y=7+(n?Math.sin(this.walking/85)*3:0);children[2].y=7-(n?Math.sin(this.walking/85)*3:0);
  const room=roomAt(this.px,this.py);if(room!==this.lastRoom){store.setRoom(room);this.lastRoom=room;}
  const nearest=objects.find(o=>Math.hypot(o.x-this.px,o.y-this.py)<88);this.hint.setText(nearest?`E / 点击 · ${nearest.label}`:'WASD / 方向键移动 · 门口可以通行');
