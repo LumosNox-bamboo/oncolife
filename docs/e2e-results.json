@@ -110,7 +110,7 @@
       "line": 0,
       "specs": [
         {
-          "title": "医生线：3 分钟内首批线索，独立治疗异常与随访",
+          "title": "医生线：报告当天、四周期、急性处置、后续随访与刷新",
           "ok": true,
           "tags": [],
           "tests": [
@@ -125,12 +125,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 3406,
+                  "duration": 7040,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-26T10:25:12.336Z",
+                  "startTime": "2026-10-27T10:46:31.697Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -138,13 +138,13 @@
               "status": "expected"
             }
           ],
-          "id": "ab852d5c69103777c6b4-818c4d0ca647b0282d0d",
+          "id": "ab852d5c69103777c6b4-9651b0f933641c221a82",
           "file": "playthrough.spec.ts",
-          "line": 13,
+          "line": 28,
           "column": 1
         },
         {
-          "title": "患者线：家庭支持、NPC 诊疗、求助高潮与日记结局",
+          "title": "患者线：症状、家庭、NPC 检查与四周期独立结局",
           "ok": true,
           "tags": [],
           "tests": [
@@ -159,12 +159,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 2484,
+                  "duration": 5581,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-26T10:25:16.405Z",
+                  "startTime": "2026-10-27T10:46:39.540Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -172,13 +172,13 @@
               "status": "expected"
             }
           ],
-          "id": "ab852d5c69103777c6b4-c913b887cfdaadc70c11",
+          "id": "ab852d5c69103777c6b4-7aa34a846009ef66b633",
           "file": "playthrough.spec.ts",
-          "line": 17,
+          "line": 33,
           "column": 1
         },
         {
-          "title": "第二检查路径与支持照护结局",
+          "title": "挑战：技术失败免费重做、有限预算、互斥资源和完整疗程",
           "ok": true,
           "tags": [],
           "tests": [
@@ -193,12 +193,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 2143,
+                  "duration": 6181,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-26T10:25:18.897Z",
+                  "startTime": "2026-10-27T10:46:45.128Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -206,13 +206,13 @@
               "status": "expected"
             }
           ],
-          "id": "ab852d5c69103777c6b4-a4716347f5bd6c3ac318",
+          "id": "ab852d5c69103777c6b4-aeedf656457b3983b564",
           "file": "playthrough.spec.ts",
-          "line": 20,
+          "line": 38,
           "column": 1
         },
         {
-          "title": "真实行走、碰撞、自动寻路、任务直达与移动端",
+          "title": "地图房间、移动碰撞、寻路、旧档保护和移动端",
           "ok": true,
           "tags": [],
           "tests": [
@@ -227,12 +227,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 6933,
+                  "duration": 7298,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-26T10:25:21.049Z",
+                  "startTime": "2026-10-27T10:46:51.318Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -240,13 +240,13 @@
               "status": "expected"
             }
           ],
-          "id": "ab852d5c69103777c6b4-2bf89077f9973ebd9b11",
+          "id": "ab852d5c69103777c6b4-85b2240156406f5f9150",
           "file": "playthrough.spec.ts",
-          "line": 21,
+          "line": 41,
           "column": 1
         },
         {
-          "title": "患者支持路径、就医取舍、旧档保护与双槽位刷新",
+          "title": "挑战多患者：共享预算、床位冲突与后台报告暂停",
           "ok": true,
           "tags": [],
           "tests": [
@@ -261,12 +261,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 2448,
+                  "duration": 1287,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-26T10:25:27.990Z",
+                  "startTime": "2026-10-27T10:46:58.626Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -274,9 +274,9 @@
               "status": "expected"
             }
           ],
-          "id": "ab852d5c69103777c6b4-9a6d72ef0e0237f05e27",
+          "id": "ab852d5c69103777c6b4-e67034705a1bb182bb0a",
           "file": "playthrough.spec.ts",
-          "line": 23,
+          "line": 46,
           "column": 1
         }
       ]
@@ -284,8 +284,8 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-26T10:25:11.603Z",
-    "duration": 18952.034,
+    "startTime": "2026-10-27T10:46:31.389Z",
+    "duration": 28638.194,
     "expected": 5,
     "skipped": 0,
     "unexpected": 0,

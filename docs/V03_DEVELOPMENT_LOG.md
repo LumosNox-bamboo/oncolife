@@ -20,3 +20,10 @@
 - 浏览器首轮三条完整疗程通过，地图测试失败是动态导入形成重复模块单例；改用真实 canvas 位置信息断言，五条流程随后通过。
 - 变更涉及 v03-campaign、v03-store、v03-engine、medical/cases、medical/validate、main、V03Panel、Hospital，以及 tests/v03、tests/playthrough。
 - 提交见 Git 日志 `feat: add shared challenge campaign case validation and playable modes`。
+
+## 阶段 7–8：界面、回归与交付
+- 患者姓名／位置动态标记在地图，门诊不会视觉上默认占床；去掉检查卡预先显示固定失败结果。
+- 保留旧版 README 与 E2E 报告；新增 V0.3 操作说明、病例清单、范围限制、医学边界与测试报告。
+- 最终 47 项逻辑测试和五条浏览器流程通过，生产构建成功。地图／桌面／移动端／结局截图保存在 docs。
+- 剩余：完整临床方案、处方剂量、真实预后模型、专家签审和旧档自动迁移未实现；详见 V03_LIMITATIONS.md。
+- P0 提交 b1498af；共享挑战与模式提交 1492a5f；最终验证与文档提交见 Git 日志。
