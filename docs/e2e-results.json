@@ -125,12 +125,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 7093,
+                  "duration": 6822,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-27T23:00:37.138Z",
+                  "startTime": "2026-10-30T08:51:40.982Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -159,12 +159,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 5989,
+                  "duration": 5561,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-27T23:00:44.935Z",
+                  "startTime": "2026-10-30T08:51:48.623Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -193,12 +193,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 6367,
+                  "duration": 6290,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-27T23:00:50.933Z",
+                  "startTime": "2026-10-30T08:51:54.191Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -227,12 +227,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 7372,
+                  "duration": 7210,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-27T23:00:57.307Z",
+                  "startTime": "2026-10-30T08:52:00.488Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -261,12 +261,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1307,
+                  "duration": 1255,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-27T23:01:04.687Z",
+                  "startTime": "2026-10-30T08:52:07.706Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -295,12 +295,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 2044,
+                  "duration": 1916,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-27T23:01:06.001Z",
+                  "startTime": "2026-10-30T08:52:08.967Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -312,15 +312,49 @@
           "file": "playthrough.spec.ts",
           "line": 49,
           "column": 1
+        },
+        {
+          "title": "普通医生模式交错接诊与住院区分",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1294,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-30T08:52:10.890Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ab852d5c69103777c6b4-943bd47191a1f6bac3fb",
+          "file": "playthrough.spec.ts",
+          "line": 58,
+          "column": 1
         }
       ]
     }
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-27T23:00:36.763Z",
-    "duration": 31391.496,
-    "expected": 6,
+    "startTime": "2026-10-30T08:51:40.668Z",
+    "duration": 31607.350000000002,
+    "expected": 7,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

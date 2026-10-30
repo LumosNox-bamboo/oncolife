@@ -131,7 +131,7 @@ function admission(s:GameState,a:'request'|'admit'|'assess'|'discharge'){
  if(a==='request'){if(s.admissions.some(x=>x.status!=='discharged'))return say(s,'已有住院申请。');s.admissions.push({id:`adm-${s.admissions.length+1}`,status:'requested',requestedAt:s.day,reason:cases[s.caseId].admissionReason,notes:[]});return say(s,'已申请住院评估；门诊治疗不会自动住院。');}
  const adm=s.admissions.at(-1);if(!adm)return say(s,'先申请住院。');
  if(a==='admit'){if(adm.status!=='requested'||s.resources.beds<1)return say(s,'状态或床位不足，不能办理入院。');s.resources.beds--;adm.status='admitted';adm.admittedAt=s.day;adm.bed='B1';event(s,'admission:'+adm.id,'admission',s.day,'入院评估与床位 B1',1);return say(s,'已入院，请完成床旁评估。');}
- if(a==='assess'){if(adm.status!=='admitted')return say(s,'尚未入院或已完成评估。');adm.status='observing';adm.notes.push('入院评估及治疗准备完成');done(s,'admission:'+adm.id);return say(s,'已评估症状、用药、护理和治疗准备，进入观察。');}
+ if(a==='assess'){if(adm.status!=='admitted')return say(s,'尚未入院或已完成评估。');adm.status='observing';adm.notes.push('入院症状、用药及护理评估完成；治疗前检查仍需另行复核');done(s,'admission:'+adm.id);return say(s,'已完成入院评估，进入观察；尚不代表满足给药条件，请按治疗预约完成当日安全复核。');}
  if(adm.status!=='observing'||unresolved(s))return say(s,'需要完成入院评估，且急性事件未处理时不能出院。');
  adm.status='discharged';adm.dischargedAt=s.day;adm.notes.push('出院评估完成；继续原预约与出院复查');s.resources.beds++;event(s,'discharge:'+adm.id,'discharge',s.day,'出院记录',2);event(s,'post-discharge:'+adm.id,'appointment',s.day+3,'出院后复查',3);return say(s,'出院时间与复查已记录。');
 }

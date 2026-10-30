@@ -55,3 +55,11 @@ test('具体病历：问诊数值、分项报告解锁及报告档案',async({pa
  await go(page,'office');await page.getByText('检查档案 · 已查看 1 份（按日期保留）',{exact:true}).click();await expect(page.getByRole('region',{name:'结构化病历'})).toContainText('3.6 cm');await expect(page.getByRole('region',{name:'结构化病历'})).not.toContainText('脑 MRI');
  await order(page,'脑 MRI');await go(page,'office');await page.getByText('检查档案 · 已查看 2 份（按日期保留）',{exact:true}).click();await expect(page.getByRole('region',{name:'结构化病历'})).toContainText('未见颅内转移');const before=await state(page);await page.reload();await page.getByRole('button',{name:/医生模式 Clinical/}).click();expect(await state(page)).toEqual(before);
 });
+test('普通医生模式交错接诊与住院区分',async({page})=>{
+ await start(page);await button(page,'开启多患者接诊').click();await go(page,'lab');await button(page,'申请增强 CT').click();await close(page);
+ await button(page,'接诊下一位').click();await expect(page.getByLabel('当前患者')).toHaveValue('early-nsclc');await expect(page.locator('.status')).toContainText('门诊评估 · 未住院');
+ await button(page,'＋1 天').click();await expect(page.locator('.toast')).toContainText('林晓禾');await page.getByLabel('当前患者').selectOption('driver-negative');await confirmReports(page);
+ await go(page,'ward');await expect(page.getByRole('dialog')).toContainText('入院评估不能替代每周期治疗前安全复核');await close(page);
+ await page.reload();await page.getByRole('button',{name:/医生模式 Clinical/}).click();await expect(page.getByLabel('当前患者')).toBeVisible();await page.getByLabel('当前患者').selectOption('early-nsclc');expect((await state(page,'doctor','learning','early-nsclc')).day).toBe(2);
+ await page.screenshot({path:'docs/v03-multi-clinic.png',fullPage:true});
+});

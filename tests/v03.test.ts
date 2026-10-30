@@ -56,3 +56,20 @@ it('technical refunds link original charge and never exceed payment',()=>{
  let s=initialV03('doctor','challenge');for(const testId of ['ct','pleura','pathology','molecular'])s=reports(action(s,'order',{testId}));const o=s.orders.at(-1)!;expect(o.status).toBe('failed');s=action(s,'orderAction',{action:'refund',orderId:o.id});const balance=s.balance;s=action(s,'orderAction',{action:'refund',orderId:o.id});expect(s.balance).toBe(balance);const refund=s.transactions.find(t=>t.kind==='refund')!;expect(refund.relatedId).toBe(o.transactionId);expect(refund.amount).toBe(620);s=action(s,'orderAction',{action:'recollect',orderId:o.id});expect(s.orders.at(-1)!.status).toBe('failed');
 });
 it('revising a diagnosis revokes treatment authorization until resubmitted',()=>{let s=ready();s=action(s,'diagnosis',{disease:'感染性病变',stage:'待定',reason:'修订',submit:false});expect(s.flags).not.toContain('diagnosis');s=action(s,'advance',{days:'next'});s=action(s,'therapy',{action:'give'});expect(s.therapy!.administrations[0].status).toBe('scheduled');});
+
+import {careSetting} from '../src/engine/care-setting';
+describe('ordinary multi-patient clinic',()=>{
+ it('preserves current progress and starts new consultations on shared day without challenge restrictions',()=>{
+  let s=run(initialV03(),{type:'advance',days:4});s=run(s,{type:'clue',id:'risk'});
+  let p=campaign('doctor',s.caseId,'learning',s);p=campaignRun(p,{type:'order',testId:'ct'});
+  p=selectPatient(p,'early-nsclc');expect(p.patients['early-nsclc']!.day).toBe(5);expect(p.patients['early-nsclc']!.mode).toBe('learning');
+  p=campaignRun(p,{type:'advance',days:1});expect(p.day).toBe(6);expect(p.resources.infusionSlots).toBe(3);expect(p.patients['driver-negative']!.orders[0].status).toBe('completed');
+  expect(p.patients['driver-negative']!.flags).toContain('risk');expect(careSetting(p.patients['early-nsclc']!)).toContain('未住院');
+ });
+ it('assigns distinct occupied beds and admission does not grant treatment clearance',()=>{
+  let p=campaign('doctor','driver-negative','learning');
+  for(const id of ['driver-negative','early-nsclc'] as const){p=selectPatient(p,id);p=campaignRun(p,{type:'admission',action:'request'});p=campaignRun(p,{type:'admission',action:'admit'});p=campaignRun(p,{type:'admission',action:'assess'});}
+  expect(p.patients['driver-negative']!.admissions[0].bed).toBe('B1');expect(p.patients['early-nsclc']!.admissions[0].bed).toBe('B2');expect(p.resources.beds).toBe(1);
+  expect(p.patients['early-nsclc']!.flags.some(f=>f.startsWith('prepared:'))).toBe(false);expect(careSetting(p.patients['early-nsclc']!)).toContain('住院观察');
+ });
+});
