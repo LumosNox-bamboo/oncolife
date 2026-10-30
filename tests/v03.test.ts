@@ -7,7 +7,7 @@ function action(s:GameState,type:any,rest:any={}){return run(s,{type,...rest});}
 function reports(s:GameState){for(let i=0;i<30;i++){const e=nextEvent(s);if(!e||e.kind!=='report')break;s=action(s,'advance',{days:'next'});s=action(s,'ack',{id:e.id});}return s;}
 function ready(mode:'learning'|'challenge'|'gauntlet'='learning',id:GameState['caseId']='driver-negative'){
  let s=initialV03('doctor',mode,id);s=action(s,'clue',{id:'goal'});
- for(const testId of ['ct',cases[id].uniqueChecks.includes('pleura')?'pleura':'ebus','pathology','molecular','blood'].filter(x=>x!=='molecular'||cases[id].uniqueChecks.includes(x))){s=action(s,'order',{testId});s=reports(s);const o=s.orders.at(-1)!;if(o.status==='failed'){s=action(s,'orderAction',{action:'recollect',orderId:o.id});s=reports(s);}}
+ for(const testId of ['ct',cases[id].uniqueChecks.includes('pleura')?'pleura':cases[id].uniqueChecks.includes('ebus')?'ebus':'needle','pathology','molecular','blood'].filter(x=>x!=='molecular'||cases[id].uniqueChecks.includes(x))){s=action(s,'order',{testId});s=reports(s);const o=s.orders.at(-1)!;if(o.status==='failed'||o.status==='insufficient_sample'){s=action(s,'orderAction',{action:'recollect',orderId:o.id});s=reports(s);}}
  s=action(s,'diagnosis',{...cases[id].diagnosis,reason:'影像、组织与分子证据',submit:true});return action(s,'therapy',{action:'start'});
 }
 function finish(s:GameState){for(let i=0;i<100&&!s.complete;i++){
@@ -28,13 +28,13 @@ describe('V0.3 P0 regressions',()=>{
  it('first administration does not finish; four cycles and post-treatment followup do',()=>{let s=ready();s=action(s,'advance',{days:'next'});s=action(s,'therapy',{action:'prepare'});s=action(s,'therapy',{action:'give'});expect(s.complete).toBe(false);expect(s.admissions).toHaveLength(0);s=finish(s);expect(s.complete,s.message).toBe(true);expect(s.therapy?.administrations.filter(x=>x.status==='given')).toHaveLength(4);expect(s.therapy?.assessments.every(x=>x.status==='done')).toBe(true);});
  it('hold/resume shifts all subsequent therapy dates and does not skip a held dose',()=>{let s=ready();const date=s.therapy!.administrations[0].scheduledAt;s=action(s,'therapy',{action:'hold'});s=action(s,'therapy',{action:'give'});expect(s.therapy!.administrations[0].status).toBe('held');s=action(s,'therapy',{action:'resume'});expect(s.therapy!.administrations[0].scheduledAt).toBe(date+1);expect(s.events.find(e=>e.id==='admin:2:1')!.scheduledAt).toBe(date+22);});
  it('cannot complete treatment via generic ack or bypass evidence gates',()=>{let s=initialV03();s=action(s,'diagnosis',{disease:'肺腺癌',stage:'IVA 教学情境',reason:'猜测',submit:true});expect(s.flags).not.toContain('diagnosis');s=ready();s=action(s,'advance',{days:'next'});s=action(s,'ack',{id:'admin:1:1'});expect(s.therapy!.administrations[0].status).toBe('scheduled');});
- it('six cases have separate paths and all finish their teaching followup',()=>{for(const id of Object.keys(cases) as GameState['caseId'][]){const s=finish(ready('learning',id));expect(s.complete,id+': '+s.message).toBe(true);}expect(new Set(Object.values(cases).map(c=>c.regimen!.id)).size).toBe(6);});
+ it('case pool has separate paths and all finish their teaching followup',()=>{for(const id of Object.keys(cases) as GameState['caseId'][]){const s=finish(ready('learning',id));expect(s.complete,id+': '+s.message).toBe(true);}expect(new Set(Object.values(cases).map(c=>c.regimen!.id)).size).toBeGreaterThanOrEqual(6);});
  it('JSON save restore is deterministic and preserves finite budget/cycles/events',()=>{const s=ready('challenge');expect(JSON.parse(JSON.stringify(s))).toEqual(s);expect(action(s,'advance',{days:'next'})).toEqual(action(JSON.parse(JSON.stringify(s)),'advance',{days:'next'}));});
  it('patient story completes independently with NPC evidence-driven plan',()=>{let s=initialV03('patient');s=action(s,'patient',{action:'describe'});s=action(s,'patient',{action:'family'});s=action(s,'patient',{action:'visit'});s=reports(s);for(let i=0;i<5;i++){s=action(s,'patient',{action:'consent'});s=reports(s);}expect(s.therapy).toBeDefined();s=finish(s);expect(s.complete,s.message).toBe(true);});
  it('six gauntlet objectives unlock sequentially',()=>{let s=ready('gauntlet');for(let i=1;i<=3;i++){expect(levelReady(s)).toBe(true);s=action(s,'level');}s=finish(s);for(let i=4;i<=6;i++){expect(levelReady(s)).toBe(true);s=action(s,'level');}expect(s.unlocked).toBe(6);});
 });
 
-import {campaign,campaignRun,selectPatient} from '../src/engine/v03-campaign';
+import {campaign,campaignRun,selectPatient,nextPatientId} from '../src/engine/v03-campaign';
 describe('shared challenge campaign',()=>{
  it('patients share budget and one bed, cannot reserve occupied resources twice',()=>{
   let p=campaign('doctor');p=campaignRun(p,{type:'order',testId:'ct'});expect(p.balance).toBe(4600);
@@ -71,5 +71,14 @@ describe('ordinary multi-patient clinic',()=>{
   for(const id of ['driver-negative','early-nsclc'] as const){p=selectPatient(p,id);p=campaignRun(p,{type:'admission',action:'request'});p=campaignRun(p,{type:'admission',action:'admit'});p=campaignRun(p,{type:'admission',action:'assess'});}
   expect(p.patients['driver-negative']!.admissions[0].bed).toBe('B1');expect(p.patients['early-nsclc']!.admissions[0].bed).toBe('B2');expect(p.resources.beds).toBe(1);
   expect(p.patients['early-nsclc']!.flags.some(f=>f.startsWith('prepared:'))).toBe(false);expect(careSetting(p.patients['early-nsclc']!)).toContain('住院观察');
+ });
+});
+
+describe('expanded random case pool',()=>{
+ it('chooses unseen patients deterministically from the seeded pool',()=>{
+  let p=campaign('doctor','driver-negative','learning');const seen=new Set(Object.keys(p.patients));
+  for(let i=0;i<4;i++){const id=nextPatientId(p)!;expect(seen.has(id)).toBe(false);seen.add(id);p=selectPatient(p,id);}
+  expect(seen.size).toBe(5);expect(nextPatientId(p)).toBeDefined();
+  expect(nextPatientId(p)).toBe(nextPatientId(structuredClone(p)));
  });
 });

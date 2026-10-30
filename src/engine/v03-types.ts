@@ -1,6 +1,6 @@
 export type Journey='doctor'|'patient';
 export type Mode='learning'|'gauntlet'|'challenge';
-export type CaseId='early-nsclc'|'locally-advanced'|'driver-positive'|'driver-negative'|'small-cell'|'recurrent';
+export type CaseId='early-nsclc'|'locally-advanced'|'driver-positive'|'driver-negative'|'small-cell'|'recurrent'|'early-squamous'|'alk-positive'|'frail-elderly'|'oligometastatic';
 export type OrderStatus='ordered'|'scheduled'|'collected'|'processing'|'completed'|'cancelled'|'failed'|'insufficient_sample'|'recollection_required'|'refunded'|'partially_refunded';
 export type EventKind='appointment'|'report'|'administration'|'assessment'|'adverse'|'response'|'admission'|'discharge'|'communication'|'finance'|'progression'|'monitor';
 export type ClinicalEvent={id:string;kind:EventKind;caseId:CaseId;scheduledAt:number;availableAt:number;occurredAt?:number;acknowledgedAt?:number;completedAt?:number;priority:number;title:string;requiresAction:boolean;payload?:Record<string,string|number|boolean>};

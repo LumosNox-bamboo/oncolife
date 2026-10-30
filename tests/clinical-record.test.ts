@@ -19,7 +19,7 @@ it('legacy completed report gains detailed display without changing saved values
 });
 it('six profiles contain distinct concrete findings and recorded uncertainty',()=>{
  for(const id of Object.keys(cases) as CaseId[]){const p=profiles[id];expect(p.vitals).toMatch(/mmHg/);expect(p.provenance).toContain('虚构');expect(caseReport(id,'ct')).toMatch(/\d+\.\d/);expect(caseReport(id,'pathology')).toMatch(/腺癌|非小细胞癌|小细胞/);expect(p.labs.crcl).toBeGreaterThan(0);}
- expect(new Set(Object.values(profiles).map(p=>p.reports.ct)).size).toBe(6);expect(caseReport('driver-positive','molecular')).toContain('EGFR exon 19');expect(caseReport('driver-negative','molecular')).toContain('TPS 10%');
+ expect(new Set(Object.values(profiles).map(p=>p.reports.ct)).size).toBe(Object.keys(profiles).length);expect(caseReport('driver-positive','molecular')).toContain('EGFR exon 19');expect(caseReport('driver-negative','molecular')).toContain('TPS 10%');
 });
 it('unoccurred acute data stays hidden and historical precheck numbers are not rewritten',()=>{
  const s=initialV03();s.events.push({id:'acute',kind:'adverse',caseId:s.caseId,scheduledAt:8,availableAt:8,title:'急性事件',priority:0,requiresAction:true});expect(clinicalRecord(s).observations).toHaveLength(0);s.day=8;s.events[0].occurredAt=8;expect(clinicalRecord(s).observations[0].text).toContain('112');
