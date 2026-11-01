@@ -4,3 +4,36 @@
 .casegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}.casegrid button{text-align:left}.panelnav{display:flex;flex-wrap:wrap;gap:5px;margin:12px 0}.cyclebar{padding:14px;background:#dce8d4;margin:14px 0}.cyclebar progress{width:100%;accent-color:#557c65}button:disabled{opacity:.45;cursor:not-allowed}@media(max-width:760px){.casegrid{grid-template-columns:1fr}}
 .patient-sheet{background:#f1f3e8;border:1px solid #d0dbc9;padding:14px 16px;margin:12px 0}.patient-sheet h3{margin-top:0}.patient-sheet p{margin:6px 0}.data-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.data-grid p{background:#fffdf7;border-left:2px solid #9ab69a;padding:7px;font-size:12px}.known-clues{border-top:1px solid #d4dfd0;padding-top:8px}@media(max-width:760px){.data-grid{grid-template-columns:1fr}}
 .report-text{white-space:pre-line}.patient-sheet small{line-height:1.6}.patient-sheet details article{margin-top:8px;padding:8px}
+
+/* Pixel UI: hard-edged frames and inset tiles share the hospital palette. */
+:root{--ink:#35594e;--edge:#557b69;--light:#ffffe9;--paper:#f2f0d9;--shade:#b4c6a6;background:#cbdac6;color:#2e4b40}
+body{background-image:linear-gradient(90deg,#ffffff12 2px,transparent 2px),linear-gradient(#ffffff12 2px,transparent 2px);background-size:24px 24px}
+button,select,textarea{border-radius:0;border:2px solid var(--edge);background:#ecefd7;box-shadow:inset 2px 2px 0 var(--light),inset -2px -2px 0 #bccba9,0 3px 0 #385848;transition:none}
+button:hover{background:#d8e8bd;border-color:#35594e;box-shadow:inset 2px 2px 0 #ffffe9,inset -2px -2px 0 #a9bd8d,0 3px 0 #385848}
+button:active:not(:disabled){transform:translateY(2px);box-shadow:inset 2px 2px 0 #a9bd8d,inset -2px -2px 0 #ffffe9,0 1px 0 #385848}
+button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px dashed #b8753d;outline-offset:4px}
+small,.brand small{color:#536e55}.eyebrow{color:#536e55}.brand b{font-family:monospace;font-weight:900;letter-spacing:-1px;text-shadow:2px 2px 0 #f8f5d8}
+.logo{border-radius:0;border:3px solid #35594e;box-shadow:inset 3px 3px 0 #8eae87,3px 3px 0 #a7b99d;font-family:monospace}.version{border-radius:0;border:2px solid #6d8965;background:#f5edcc}
+.toplinks button{background:#e3e9cc}.status{border-radius:0;border:3px solid var(--edge);background:var(--paper);box-shadow:inset 3px 3px 0 var(--light),inset -3px -3px 0 var(--shade),4px 4px 0 #90a98b}
+.mission{border-left:2px dashed #a4b58f}.identity .avatar{border-color:#f9f7dc;outline:2px solid #5f8067;box-shadow:3px 3px 0 #acbd9a}
+.gamewrap{border-radius:0;border:6px solid #f2efcf;outline:3px solid #557b69;box-shadow:6px 6px 0 #8ba78b}
+.mapnote{background:#e5e9ce;border-top:2px solid #a7b99d;color:#3d604d}.dot{border-radius:0}
+.toast,.feedback{position:relative;border:3px solid var(--edge);border-left-width:8px;background:#f2f0d9;box-shadow:inset 2px 2px 0 var(--light),inset -2px -2px 0 #c0cba9,4px 4px 0 #9aaf90;padding:14px 18px;font-size:13px}
+.toast.alert{background:#f2e0bf;border-color:#946845}.warning{border:2px solid #a57850;background:#f1dfbd;box-shadow:inset 2px 2px 0 #fff0cf}.success{border:2px solid #64845b;box-shadow:inset 3px 3px 0 #f5ffdb}
+.overlay{backdrop-filter:none;background:#203d38bd;background-image:repeating-linear-gradient(0deg,transparent 0 3px,#132c2510 3px 4px)}
+.modal{border-radius:0;border:4px solid #476652;background:var(--paper);box-shadow:inset 4px 4px 0 #ffffe9,inset -4px -4px 0 #bdc7a5,0 0 0 4px #dbdec1,0 0 0 7px #35594e,10px 12px 0 #173b3580;scrollbar-color:#678965 #dedfc2;scrollbar-width:thin}
+.modalhead{border-bottom:3px double #839771;padding-bottom:14px}.modalhead h2{font-weight:800;letter-spacing:1px;text-shadow:1px 1px 0 #fffde6}
+.report,.testcard,.patient-sheet{border-radius:0;border:2px solid #91a17c;background:#faf6de;box-shadow:inset 2px 2px 0 #ffffef,inset -2px -2px 0 #dee1be}
+.testcard h4,.patient-sheet h3{border-bottom:2px dashed #b6be98;padding-bottom:8px;color:#365a48}.data-grid p{border-left:4px solid #90a77e;background:#eeeccd}
+.hypothesis,.cyclebar,.wellbeing{border:2px solid #94a37e;box-shadow:inset 2px 2px 0 #f8f9d9;background:#dfe6c7}
+.cyclebar progress{height:14px;border:2px solid #4c7159;border-radius:0;background:#c2ceac}.cyclebar progress::-webkit-progress-bar{background:#c2ceac}.cyclebar progress::-webkit-progress-value{background:repeating-linear-gradient(90deg,#5a8963 0 10px,#78a571 10px 12px)}
+.panelnav{gap:8px;padding-bottom:5px}details{border-bottom:2px dashed #b5bf99}summary::marker{color:#61805b}textarea{background:#fffbe6;line-height:1.7}.textbutton{border:0;box-shadow:none;background:none;color:#4b684a;padding:2px}.textbutton:hover{box-shadow:none;background:#dce6c4}.touch{opacity:1}.touch button{font-weight:800}
+.journey-menu .modal{width:900px;padding:28px;background-color:#e9edcf;background-image:linear-gradient(90deg,#92ac7d10 2px,transparent 2px),linear-gradient(#92ac7d10 2px,transparent 2px);background-size:24px 24px}
+.journey-menu .modal>small:first-child{display:inline-block;background:#416c58;color:#fff5cf;border:2px solid #2e5142;padding:4px 14px;box-shadow:3px 3px 0 #a1b58b;font-family:monospace;font-size:14px;letter-spacing:3px}
+.journey-menu h1{font-family:"PingFang SC","Microsoft YaHei",sans-serif;font-size:32px;line-height:1.5;font-weight:900;letter-spacing:3px;text-shadow:2px 2px 0 #fffce1;margin:18px 0 10px}
+.journey-choices{gap:18px;margin:22px 0}.journey-choices button{position:relative;border:3px solid #4f755b;padding:18px;background:#d9e7bd;box-shadow:inset 4px 4px 0 #f5ffe0,inset -4px -4px 0 #a3b68b,4px 5px 0 #6e8c6b}
+.journey-choices button:last-child{background:#eddbb4;border-color:#94744e;box-shadow:inset 4px 4px 0 #fff1cb,inset -4px -4px 0 #c4a97b,4px 5px 0 #8e7b55}
+.journey-choices button:hover{background:#c9dda6}.journey-choices button:last-child:hover{background:#e6cc96}.journey-choices span{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;background:#f6f7dc;border:3px solid #60805d;box-shadow:4px 4px 0 #adbf91;font-size:28px;line-height:1}.journey-choices button:last-child span{border-color:#a38358;background:#fff0cb;box-shadow:4px 4px 0 #c8ae80}
+.journey-choices b{display:block;border-top:2px dashed #98ad81;padding-top:10px}.journey-choices h2{font-size:22px}.journey-choices p{margin:8px 0 12px}.casegrid{gap:12px}.casegrid button{background:#f4efce;padding:12px}.casegrid small{margin-top:4px}.journey-menu h3{border-bottom:3px double #94a37a;padding-bottom:8px}
+@media(max-width:760px){main{padding:12px}.brand b{font-size:22px}.overlay{padding:13px}.modal{max-height:92dvh;padding:14px}.journey-menu .modal{padding:16px}.journey-menu h1{font-size:24px;letter-spacing:1px}.journey-choices{grid-template-columns:1fr;gap:14px}.journey-choices button{padding:14px}.journey-choices p{font-size:13px}.journey-choices span{float:right;width:40px;height:40px}.journey-choices h2{margin-top:0}.status{padding:12px;gap:12px}.mission{border-left:0;border-top:2px dashed #a4b58f}.gamewrap{border-width:4px;box-shadow:4px 4px 0 #8ba78b}.travel label{width:100%}.travel select{max-width:100%}.mapnote{letter-spacing:0}.toast{padding:12px;font-size:12px}footer{letter-spacing:1px}.toplinks button{min-height:32px}.casegrid{gap:10px}}
+@media(prefers-reduced-motion:reduce){button:active:not(:disabled){transform:none}}
