@@ -56,7 +56,7 @@ test('具体病历：问诊数值、分项报告解锁及报告档案',async({pa
  await order(page,'脑 MRI');await go(page,'office');await page.getByText('检查档案 · 已查看 2 份（按日期保留）',{exact:true}).click();await expect(page.getByRole('region',{name:'结构化病历'})).toContainText('未见颅内转移');const before=await state(page);await page.reload();await page.getByRole('button',{name:/医生模式 Clinical/}).click();expect(await state(page)).toEqual(before);
 });
 test('普通医生模式交错接诊与住院区分',async({page})=>{
- await start(page);await button(page,'开启多患者接诊').click();await go(page,'lab');await button(page,'申请增强 CT').click();await close(page);
+ await start(page);await expect(page.getByLabel('当前患者')).toBeVisible();await go(page,'lab');await button(page,'申请增强 CT').click();await close(page);
  await button(page,'接诊下一位').click();const nextId=await page.getByLabel('当前患者').inputValue();expect(nextId).not.toBe('driver-negative');await expect(page.locator('.status')).toContainText('门诊评估 · 未住院');
  await button(page,'＋1 天').click();await expect(page.locator('.toast')).toContainText('林晓禾');await page.getByLabel('当前患者').selectOption('driver-negative');await confirmReports(page);
  await go(page,'ward');await expect(page.getByRole('dialog')).toContainText('入院评估不能替代每周期治疗前安全复核');await close(page);
@@ -70,4 +70,11 @@ test('开场隐藏病例，教学可指定，挑战随机后继续原进度',asy
  await button(page,'主菜单').click();await button(page,'挑战模式 · 有限资源').click();await expect(page.getByLabel('当前患者')).toHaveValue('early-nsclc');await expect(page.getByLabel('当前患者').locator('option')).toHaveCount(1);await button(page,'＋1 天').click();
  await page.reload();await button(page,'挑战模式 · 有限资源').click();expect((await state(page,'doctor','challenge','early-nsclc')).day).toBe(2);
  await button(page,'主菜单').click();await page.screenshot({path:'docs/pixel-mode-menu.png',fullPage:true});
+});
+test('默认多患者：批量并行检查后在弹窗接诊下一位',async({page})=>{
+ await start(page);await expect(page.getByLabel('当前患者')).toBeVisible();await go(page,'lab');
+ for(const name of ['增强 CT','血常规与肾功能','肝功能','电解质'])await page.getByRole('checkbox',{name:'选择'+name,exact:true}).check();
+ await button(page,'批量申请所选检查').click();let s=await state(page);expect(s.orders).toHaveLength(4);expect(s.day).toBe(1);expect(s.orders.every((o:any)=>o.availableAt===2)).toBe(true);
+ await page.getByRole('dialog').getByRole('button',{name:'接诊下一位',exact:true}).click();const id=await page.getByLabel('切换接诊患者').inputValue();expect(id).not.toBe('driver-negative');await expect(page.getByRole('dialog')).toContainText('在管患者 2 人');
+ await next(page);expect((await state(page)).orders.every((o:any)=>o.status==='completed')).toBe(true);await page.getByLabel('当前患者').selectOption('driver-negative');await go(page,'lab');await expect(page.getByRole('dialog')).toContainText('ALT 23');await page.screenshot({path:'docs/batch-investigations.png',fullPage:true});
 });

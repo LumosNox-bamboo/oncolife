@@ -6,7 +6,7 @@ import {base,applyOrder,regimenTherapy,testInfo,costs} from './v03-cases';
 import {advanceClock,advanceToNext,acknowledge,nextEvent} from './v03-clock';
 import {safeToTreat} from '../medical/knowledge';
 import {refund,charge} from './v03-ledger';
-export type Command={type:'case';caseId:CaseId}|{type:'mode';mode:Mode}|{type:'clue';id:string}|{type:'order';testId:string}|{type:'orderAction';action:'cancel'|'recollect'|'refund';orderId:string}|{type:'ack';id:string}|{type:'advance';days:number|'next'}|{type:'diagnosis';disease:string;stage:string;reason:string;submit:boolean}|{type:'admission';action:'request'|'admit'|'assess'|'discharge'}|{type:'therapy';action:'start'|'prepare'|'give'|'hold'|'resume'|'adjust'|'switch'|'stop'|'response'|'support'}|{type:'challenge';action:'aid'|'transfer'|'reserveUrgent'}|{type:'patient';action:'wait'|'visit'|'describe'|'family'|'consent'|'rest'|'report'|'refuse'}|{type:'adverse';action:'assess'|'investigate'|'treat'}|{type:'life';choice:'family'|'transport'}|{type:'level'};
+export type Command={type:'case';caseId:CaseId}|{type:'mode';mode:Mode}|{type:'clue';id:string}|{type:'order';testId:string}|{type:'orderBatch';testIds:string[]}|{type:'orderAction';action:'cancel'|'recollect'|'refund';orderId:string}|{type:'ack';id:string}|{type:'advance';days:number|'next'}|{type:'diagnosis';disease:string;stage:string;reason:string;submit:boolean}|{type:'admission';action:'request'|'admit'|'assess'|'discharge'}|{type:'therapy';action:'start'|'prepare'|'give'|'hold'|'resume'|'adjust'|'switch'|'stop'|'response'|'support'}|{type:'challenge';action:'aid'|'transfer'|'reserveUrgent'}|{type:'patient';action:'wait'|'visit'|'describe'|'family'|'consent'|'rest'|'report'|'refuse'}|{type:'adverse';action:'assess'|'investigate'|'treat'}|{type:'life';choice:'family'|'transport'}|{type:'level'};
 // Seeded fictional logistics only; this is not a clinical probability model.
 export function teachingDraw(seed:number){let x=seed|0;x^=x<<13;x^=x>>>17;x^=x<<5;return (x>>>0)/4294967296;}
 export const initialV03=(journey:Journey='doctor',mode:Mode='learning',caseId:CaseId='driver-negative')=>base(caseId,journey,mode);
@@ -50,6 +50,11 @@ export function run(before:GameState,c:Command):GameState{
  if(c.type==='clue'){
   if(s.flags.includes(c.id))return say(s,'已记录：'+interviewText(s,c.id),'回看问诊','case');mark(s,c.id);
   const text=interviewText(s,c.id);s.clues.push(text);s.score.communication+=2;return say(s,text,'问诊','case');
+ }
+ if(c.type==='orderBatch'){
+  if(s.journey!=='doctor')return say(s,'患者不能开医嘱，请通过知情同意安排检查。');
+  const results:string[]=[];for(const id of [...new Set(c.testIds)]){s=order(s,id);results.push(`${testInfo[id]?.name||id}：${s.message}`);}
+  return say(s,results.join('\n'),'批量申请检查','ng122');
  }
  if(c.type==='order'){
   if(s.journey==='patient')return say(s,'患者不能开医嘱，请通过就医与知情同意安排检查。');
@@ -104,7 +109,7 @@ export function run(before:GameState,c:Command):GameState{
  return s;
 }
 function order(s:GameState,id:string){
- if(!testInfo[id]||!cases[s.caseId].uniqueChecks.concat('blood','xray').includes(id))return say(s,'该检查不在当前可用候选中。');
+ if(!testInfo[id]||!cases[s.caseId].uniqueChecks.concat('blood','xray','liver','electrolytes','coagulation','ecg').includes(id))return say(s,'该检查不在当前可用候选中。');
  if(id==='pathology'&&!s.orders.some(o=>['pleura','needle','ebus'].includes(o.testId)&&o.status==='completed'))return say(s,'病理需要可用组织。先选择取样路径。','检查依赖','ng122');
  if(id==='molecular'&&!read(s,'pathology'))return say(s,'需要先查看组织病理、确认样本可用。','检查依赖','ng122');
  const n=applyOrder(s,id);if(n.orders.length>s.orders.length){n.score.appropriateness+=id==='xray'?0:2;n.score.resources+=1;const e=n.events.at(-1)!;e.id+=':0';n.orders.at(-1)!.attempt=0;}

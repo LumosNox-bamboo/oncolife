@@ -6,7 +6,7 @@ export function nextPatientId(c:Campaign):CaseId|undefined{const ids=Object.keys
 export type Campaign={version:3;journey:Journey;activeId:CaseId;day:number;balance:number;resources:GameState['resources'];patients:Partial<Record<CaseId,GameState>>};
 export function campaign(journey:Journey,id:CaseId='driver-negative',mode:Mode='challenge',existing?:GameState):Campaign{const s=existing?structuredClone(existing):initialV03(journey,mode,id);return {version:3,journey,activeId:id,day:s.day,balance:s.balance,resources:{...s.resources},patients:{[id]:s}};}
 function shared(c:Campaign){for(const s of Object.values(c.patients)){s.balance=c.balance;s.day=c.day;s.clock.now=c.day;s.resources={...c.resources};}return c;}
-export function selectPatient(before:Campaign,id:CaseId):Campaign{const c=structuredClone(before);c.activeId=id;c.patients[id]??=initialV03(c.journey,c.patients[before.activeId]!.mode,id);const current=c.patients[id]!;const e=nextEvent(current);current.message=`当前接诊：${cases[id].title.split(' · ')[0]}。${e&&e.availableAt<=c.day?'有待处理事件，请查看当前任务。':'可继续问诊、检查或按预约返院。'}`;return shared(c);}
+export function selectPatient(before:Campaign,id:CaseId):Campaign{if(before.activeId===id&&before.patients[id])return structuredClone(before);const c=structuredClone(before);c.activeId=id;c.patients[id]??=initialV03(c.journey,c.patients[before.activeId]!.mode,id);const current=c.patients[id]!;const e=nextEvent(current);current.message=`当前接诊：${cases[id].title.split(' · ')[0]}。${e&&e.availableAt<=c.day?'有待处理事件，请查看当前任务。':'可继续问诊、检查或按预约返院。'}`;return shared(c);}
 export function campaignRun(before:Campaign,command:Command):Campaign{
  const c=structuredClone(before);if(command.type==='case')return selectPatient(c,command.caseId);
  if(command.type==='advance'){

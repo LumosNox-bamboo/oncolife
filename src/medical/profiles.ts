@@ -1,3 +1,4 @@
+import {supportingResult} from './supporting-tests';
 import {CaseId} from '../engine/v03-types';
 import {patient} from './knowledge';
 import {investigations} from './investigations';
@@ -44,5 +45,5 @@ export const profiles:Record<CaseId,CaseProfile>={
 export function labText(id:CaseId){const l=profiles[id].labs;return `ANC ${l.anc}×10⁹/L；血小板 ${l.platelets}×10⁹/L；CrCl ${l.crcl} mL/min。固定教学样本值，不代表真实检测或恢复速度。`;}
 export function caseReport(id:CaseId,testId:string){
  if(testId==='blood')return labText(id);
- return profiles[id].reports[testId]||null;
+ return supportingResult(id,testId)||profiles[id].reports[testId]||null;
 }
