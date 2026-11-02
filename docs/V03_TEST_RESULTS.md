@@ -88,3 +88,12 @@
 - 生产构建通过，既有 Phaser chunk-size 提示保留。
 - 已检查 desktop summary／hospital 与 390px 手机截图：clinic-week-summary.png、clinic-week-hospital.png、clinic-week-mobile.png。手机无横向溢出。
 - 验证仅证明规则、交互及保存可用；未做玩家留存、付费意愿或教育效果实测。
+
+## 日常接诊改版 · 2026-11-02
+
+- `npm test`：67/67。
+- `npm run build`：成功，保留已有 Phaser 分包体积警告。
+- `npm run test:e2e`：10/10（37.4 秒）。完整医生／患者疗程及挑战流程仍通过。
+- 新流程实际浏览器完成：第一位问诊和 CT → 接第二位问诊 → 下班 80 游戏币 → 买沙发 → 次日已有报告阻止跳日 → 刷新保留资金家具 → 阅读报告后继续。
+- 单测覆盖：免杂务结算、重复结算防护、重复问诊去重、开检查不奖励、无接诊日不付钱、跨周继续和旧数据兼容。
+- 截图已检查：`clinic-life-hospital.png`、`clinic-life-evening.png`；390px 无横向溢出。

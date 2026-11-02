@@ -1,26 +1,22 @@
 import {it,expect} from 'vitest';
 import {campaign,campaignRun} from '../src/engine/v03-campaign';
-import {weekRun,clinicalProgress} from '../src/engine/clinic-week';
+import {weekRun,clinicalProgress,seenToday} from '../src/engine/clinic-week';
 const start=()=>weekRun(campaign('doctor','driver-negative','learning'),{type:'start'},'医院大厅');
-it('plays seven shifts, purchases meaningful upgrades and continues without resetting patients',()=>{
- let c=start();for(let i=0;i<7;i++){c=weekRun(c,{type:'work',id:'round'},'病房');c=weekRun(c,{type:'choice',index:0},'病房');c=weekRun(c,{type:'end'},'病房');}
- expect(c.week!.phase).toBe('summary');expect(c.day).toBe(8);expect(c.week!.history).toHaveLength(7);expect(c.week!.souvenirs).toContain('小夏的手写便签');
- c=weekRun(c,{type:'buy',id:'nurse'},'医生办公室');const balance=c.week!.funds;c=weekRun(c,{type:'buy',id:'nurse'},'医生办公室');expect(c.week!.funds).toBe(balance);
- const patient=structuredClone(c.patients);c=weekRun(c,{type:'next'},'医生办公室');expect(c.week!.week).toBe(2);expect(c.week!.actions).toBe(4);expect(c.patients).toEqual(patient);expect(c.balance).toBe(1000000000);
+it('ends a day without chores and preserves patients and furniture on the next morning',()=>{
+ let c=start();const cmd={type:'clue' as const,id:'goal'};c=clinicalProgress(c,campaignRun(c,cmd),cmd);
+ c=weekRun(c,{type:'end'},'医院大厅');expect(c.day).toBe(2);expect(c.week!.funds).toBe(100);expect(c.week!.phase).toBe('summary');
+ c=weekRun(c,{type:'buy',id:'lounge'},'医院大厅');expect(c.week!.funds).toBe(10);const saved=JSON.parse(JSON.stringify(c));
+ c=weekRun(saved,{type:'buy',id:'lounge'},'医院大厅');expect(c.week!.funds).toBe(10);
+ const patients=structuredClone(c.patients);c=weekRun(c,{type:'next'},'医院大厅');expect(c.patients).toEqual(patients);expect(c.week!.upgrades).toContain('lounge');expect(seenToday(c.week!)).toEqual([]);
 });
-it('requires visiting rooms and enforces daily action and event uniqueness',()=>{
- let c=start();c=weekRun(c,{type:'work',id:'round'},'医院大厅');expect(c.week!.actions).toBe(3);
- c=weekRun(c,{type:'work',id:'round'},'病房');c=weekRun(c,{type:'work',id:'round'},'病房');expect(c.week!.actions).toBe(2);
- c=weekRun(c,{type:'choice',index:1},'病房');const w=structuredClone(c.week!);c=weekRun(c,{type:'choice',index:0},'病房');expect(c.week!.funds).toBe(w.funds);expect(c.week!.trust).toBe(w.trust);
+it('does not pay for unnecessary tests or repeated interviews and does not double-settle',()=>{
+ let c=start();for(const cmd of [{type:'clue' as const,id:'goal'},{type:'clue' as const,id:'goal'},{type:'order' as const,testId:'ct'}])c=clinicalProgress(c,campaignRun(c,cmd),cmd);
+ expect(seenToday(c.week!)).toHaveLength(1);c=weekRun(c,{type:'end'},'医院大厅');expect(c.week!.funds).toBe(100);c=weekRun(c,{type:'end'},'医院大厅');expect(c.week!.funds).toBe(100);expect(c.week!.history).toHaveLength(1);
+ c=weekRun(c,{type:'next'},'医院大厅');c=weekRun(c,{type:'end'},'医院大厅');expect(c.day).toBe(2);expect(c.week!.history).toHaveLength(1);
 });
-it('settlement cannot bypass due reports or grant rewards twice',()=>{
- let c=start();c=campaignRun(c,{type:'order',testId:'ct'});c=campaignRun(c,{type:'advance',days:1});c=weekRun(c,{type:'work',id:'round'},'病房');c=weekRun(c,{type:'choice',index:0},'病房');const day=c.day,funds=c.week!.funds;c=weekRun(c,{type:'end'},'病房');expect(c.day).toBe(day);expect(c.week!.funds).toBe(funds);expect(c.week!.history).toHaveLength(0);
- c=campaignRun(c,{type:'ack',id:'report:ord-1:0'});c=weekRun(c,{type:'end'},'病房');expect(c.week!.history).toHaveLength(1);c=weekRun(c,{type:'end'},'病房');expect(c.week!.history).toHaveLength(1);
+it('can take a day off with no income and continue beyond seven days',()=>{
+ let c=start();for(let i=0;i<9;i++){c=weekRun(c,{type:'end'},'医院大厅');c=weekRun(c,{type:'next'},'医院大厅');}expect(c.day).toBe(10);expect(c.week!.funds).toBe(60);expect(c.week!.week).toBe(2);
 });
-it('records clinical work without spending action points or farming repeated clicks',()=>{
- let c=start();const cmd={type:'clue' as const,id:'goal'};c=clinicalProgress(c,campaignRun(c,cmd),cmd);c=clinicalProgress(c,campaignRun(c,cmd),cmd);expect(c.week!.clinical).toHaveLength(1);expect(c.week!.actions).toBe(3);expect(JSON.parse(JSON.stringify(c))).toEqual(c);
-});
-it('has a no-money fallback and distinct choice consequences',()=>{
- let a=start(),b=start();a=weekRun(a,{type:'choice',index:0},'病房');b=weekRun(b,{type:'choice',index:1},'病房');expect(a.week!.actions).not.toBe(b.week!.actions);expect(a.week!.funds).not.toBe(b.week!.funds);
- let c=start();c.week!.funds=0;c=weekRun(c,{type:'work',id:'round'},'病房');c=weekRun(c,{type:'choice',index:2},'病房');c=weekRun(c,{type:'end'},'病房');expect(c.week!.shift).toBe(2);
+it('preserves legacy savings and counts legacy clinical entries once per patient, excluding orders',()=>{
+ let c=start();c.week!.clinical=['driver-negative:interview','driver-negative:review','early-nsclc:orders'];c.week!.funds=234;c.week!.upgrades=['nurse'];c=weekRun(c,{type:'end'},'医院大厅');expect(c.week!.funds).toBe(274);expect(c.week!.upgrades).toEqual(['nurse']);
 });

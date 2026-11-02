@@ -78,18 +78,17 @@ test('默认多患者：批量并行检查后在弹窗接诊下一位',async({pa
  await page.getByRole('dialog').getByRole('button',{name:'接诊下一位',exact:true}).click();const id=await page.getByLabel('切换接诊患者').inputValue();expect(id).not.toBe('driver-negative');await expect(page.getByRole('dialog')).toContainText('在管患者 2 人');
  await next(page);expect((await state(page)).orders.every((o:any)=>o.status==='completed')).toBe(true);await page.getByLabel('当前患者').selectOption('driver-negative');await go(page,'lab');await expect(page.getByRole('dialog')).toContainText('ALT 23');await page.screenshot({path:'docs/batch-investigations.png',fullPage:true});
 });
-test('七天门诊周：院内工作、临床奖励、事件阻断、升级及下周恢复',async({page})=>{
- await page.goto('/');await button(page,'七天门诊周 · 建设我的科室').click();await page.getByRole('dialog').getByRole('button',{name:'开始七天门诊周',exact:true}).click();
- const week=async()=>{await close(page);await page.getByRole('button',{name:/^科室周记 ·/}).click();};
- await go(page,'clinic');await button(page,'患者目标与意愿').click();await go(page,'lab');await page.getByRole('checkbox',{name:'选择增强 CT',exact:true}).check();await button(page,'批量申请所选检查').click();
- for(let day=1;day<=7;day++){
-  await week();if(await button(page,'前往病房').count())await button(page,'前往病房').click();await button(page,'执行和护士小夏交班').click();
-  const labels=['亲自整理交接本（1 行动）','协调返程信息（1 行动）','协助核对通知（1 行动）','一起午休（1 行动）','讨论可执行的生活计划（1 行动）','分担交接（2 行动）','组织团队复盘（1 行动）'];
-  await page.getByRole('button',{name:new RegExp('^'+labels[day-1].replace(/[（）]/g,'\\$&'))}).click();
-  await button(page,'结束当天并结算').click();
-  if(day===2){await expect(page.getByRole('dialog')).toContainText('先处理后再下班');await confirmReports(page);await week();await button(page,'结束当天并结算').click();}
- }
- await expect(page.getByRole('dialog')).toContainText('第 1 周结算');await page.getByRole('button',{name:/购买聘请门诊协作护士/}).click();await page.getByRole('button',{name:/购买布置休息角/}).click();
- const pool=await page.evaluate(()=>JSON.parse(localStorage.getItem('oncolife-v3-campaign-doctor-learning')!));expect(pool.week.history).toHaveLength(7);expect(pool.week.upgrades).toEqual(['nurse','lounge']);expect(pool.week.history[0].clinical).toBe(2);expect(pool.patients['driver-negative'].orders).toHaveLength(1);
- await page.screenshot({path:'docs/clinic-week-summary.png',fullPage:true});await page.reload();await button(page,'七天门诊周 · 建设我的科室').click();await expect(page.getByRole('dialog')).toContainText('第 1 周结算');await button(page,'开始下一周').click();await expect(page.getByRole('dialog')).toContainText('第 2 周');await expect(page.getByRole('dialog')).toContainText('行动 4');await close(page);await page.screenshot({path:'docs/clinic-week-hospital.png',fullPage:true});await page.setViewportSize({width:390,height:844});await week();await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);await page.screenshot({path:'docs/clinic-week-mobile.png',fullPage:true});
+test('小科室：接诊、等待时换患者、下班买沙发及第二天读档',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await button(page,'我的小科室 · 上班啦').click();
+ await go(page,'clinic');await button(page,'患者目标与意愿').click();await go(page,'lab');await button(page,'申请增强 CT').click();await close(page);
+ await button(page,'接诊下一位').click();await go(page,'clinic');await button(page,'患者目标与意愿').click();await close(page);
+ await button(page,'我的科室 · 下班 / 买家具').click();await button(page,'下班，明天再来').click();await expect(page.getByRole('dialog')).toContainText('今天看了 2 位病人，收入 80 游戏币');
+ await page.getByText('给科室添点东西',{exact:true}).click();await button(page,'买一张新沙发 · 90 游戏币').click();await button(page,'第二天上班').click();
+ await page.screenshot({path:'docs/clinic-life-hospital.png',fullPage:true});
+ await button(page,'我的科室 · 下班 / 买家具').click();await button(page,'下班，明天再来').click();await expect(page.getByRole('dialog')).toContainText('先看完，再下班');
+ const pool=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('oncolife-v3-campaign-doctor-learning')!));const before=await pool();expect(before.day).toBe(2);expect(before.week.funds).toBe(50);expect(before.week.upgrades).toContain('lounge');
+ await page.reload();await button(page,'我的小科室 · 上班啦').click();expect((await pool()).week.funds).toBe(50);await page.getByLabel('当前患者').selectOption('driver-negative');await confirmReports(page);
+ await close(page);await button(page,'我的科室 · 下班 / 买家具').click();await button(page,'下班，明天再来').click();expect((await pool()).day).toBe(3);
+ await page.setViewportSize({width:390,height:844});await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);await page.screenshot({path:'docs/clinic-life-evening.png',fullPage:true});expect(errors).toEqual([]);
 });
