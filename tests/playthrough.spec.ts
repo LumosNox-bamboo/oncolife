@@ -4,7 +4,7 @@ async function close(p:Page){if(await button(p,'返回医院 ×').count())await 
 async function go(p:Page,id:string){await close(p);await p.getByLabel('旅行目的地').selectOption(id);await button(p,'快速旅行').click();await p.keyboard.press('e');await expect(p.getByRole('dialog')).toBeVisible();}
 async function next(p:Page){await close(p);await button(p,'下一事件').click();}
 async function state(p:Page,j='doctor',m='learning',c='driver-negative'){return p.evaluate(k=>JSON.parse(localStorage.getItem(k)!),`oncolife-v3-${j}-${m}-${c}`);}
-async function start(p:Page,j='doctor',m='learning'){await p.goto('/');await p.getByRole('button',{name:j==='doctor'?/医生模式 Clinical/:/患者模式 Patient/}).click();if(m==='challenge'){await button(p,'主菜单').click();await button(p,'挑战模式 · 有限资源').click();}await expect(p.locator('canvas')).toBeVisible();}
+async function start(p:Page,j='doctor',m='learning'){if(m==='challenge')await p.addInitScript(()=>{crypto.getRandomValues=((a:Uint32Array)=>{a.fill(1503238553);return a;}) as typeof crypto.getRandomValues;});await p.goto('/');await p.getByRole('button',{name:j==='doctor'?/医生模式 Clinical/:/患者模式 Patient/}).click();if(m==='challenge'){await button(p,'主菜单').click();await button(p,'挑战模式 · 有限资源').click();}await expect(p.locator('canvas')).toBeVisible();}
 async function confirmReports(p:Page){await go(p,'lab');while(await button(p,'查看并确认报告').count())await button(p,'查看并确认报告').first().click();}
 async function order(p:Page,name:string){await go(p,'lab');await button(p,'申请'+name).click();await next(p);await confirmReports(p);}
 async function setup(p:Page,m='learning'){
@@ -44,7 +44,7 @@ test('地图房间、移动碰撞、寻路、旧档保护和移动端',async({pa
  await page.keyboard.down('ArrowLeft');await page.waitForTimeout(1800);await page.keyboard.up('ArrowLeft');const x=await page.locator('canvas').getAttribute('data-player-x').then(Number);expect(x).toBeGreaterThan(30);expect(x).toBeLessThan(155);expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('oncolife-v2-doctor')!).day)).toBe(42);await page.setViewportSize({width:390,height:844});await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);await page.screenshot({path:'docs/v03-mobile.png',fullPage:true});
 });
 test('挑战多患者：共享预算、床位冲突与后台报告暂停',async({page})=>{
- await start(page,'doctor','challenge');await go(page,'lab');await button(page,'申请增强 CT').click();await go(page,'ward');await button(page,'申请住院评估').click();await button(page,'办理入院').click();await button(page,'完成入院评估').click();await close(page);await page.getByLabel('当前患者').selectOption('early-nsclc');await go(page,'ward');await button(page,'申请住院评估').click();await button(page,'办理入院').click();await expect(page.locator('.feedback')).toContainText('床位不足');await next(page);expect((await state(page,'doctor','challenge','early-nsclc')).day).toBe(2);await next(page);expect((await state(page,'doctor','challenge','early-nsclc')).day).toBe(2);await page.getByLabel('当前患者').selectOption('driver-negative');await confirmReports(page);expect((await state(page,'doctor','challenge')).balance).toBe(4600);
+ await start(page,'doctor','challenge');await go(page,'lab');await button(page,'申请增强 CT').click();await go(page,'ward');await button(page,'申请住院评估').click();await button(page,'办理入院').click();await button(page,'完成入院评估').click();await close(page);await button(page,'接诊下一位').click();const otherId=await page.getByLabel('当前患者').inputValue();await go(page,'ward');await button(page,'申请住院评估').click();await button(page,'办理入院').click();await expect(page.locator('.feedback')).toContainText('床位不足');await next(page);expect((await state(page,'doctor','challenge',otherId)).day).toBe(2);await next(page);expect((await state(page,'doctor','challenge',otherId)).day).toBe(2);await page.getByLabel('当前患者').selectOption('driver-negative');await confirmReports(page);expect((await state(page,'doctor','challenge')).balance).toBe(4600);
 });
 test('具体病历：问诊数值、分项报告解锁及报告档案',async({page})=>{
  await start(page);await go(page,'clinic');const sheet=page.getByRole('region',{name:'结构化病历'});
@@ -62,4 +62,12 @@ test('普通医生模式交错接诊与住院区分',async({page})=>{
  await go(page,'ward');await expect(page.getByRole('dialog')).toContainText('入院评估不能替代每周期治疗前安全复核');await close(page);
  await page.reload();await page.getByRole('button',{name:/医生模式 Clinical/}).click();await expect(page.getByLabel('当前患者')).toBeVisible();await page.getByLabel('当前患者').selectOption(nextId);expect((await state(page,'doctor','learning',nextId)).day).toBe(2);
  await page.screenshot({path:'docs/v03-multi-clinic.png',fullPage:true});
+});
+test('开场隐藏病例，教学可指定，挑战随机后继续原进度',async({page})=>{
+ await page.addInitScript(()=>{crypto.getRandomValues=((a:Uint32Array)=>{a.fill(0);return a;}) as typeof crypto.getRandomValues;});
+ await page.goto('/');const menu=page.getByRole('dialog');await expect(menu.getByRole('button',{name:/周岚 · 早期/})).not.toBeVisible();
+ await menu.getByText('指定教学病例 · 仅学习模式',{exact:true}).click();await expect(menu.getByRole('button',{name:/周岚 · 早期/})).toBeVisible();await menu.getByRole('button',{name:/周岚 · 早期/}).click();expect((await state(page,'doctor','learning','early-nsclc')).caseId).toBe('early-nsclc');
+ await button(page,'主菜单').click();await button(page,'挑战模式 · 有限资源').click();await expect(page.getByLabel('当前患者')).toHaveValue('early-nsclc');await expect(page.getByLabel('当前患者').locator('option')).toHaveCount(1);await button(page,'＋1 天').click();
+ await page.reload();await button(page,'挑战模式 · 有限资源').click();expect((await state(page,'doctor','challenge','early-nsclc')).day).toBe(2);
+ await button(page,'主菜单').click();await page.screenshot({path:'docs/pixel-mode-menu.png',fullPage:true});
 });

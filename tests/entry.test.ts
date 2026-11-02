@@ -1,0 +1,6 @@
+import {it,expect} from 'vitest';
+import {randomCase,savedEntry,entryKey} from '../src/engine/entry';
+import {initialV03} from '../src/engine/v03-engine';
+it('draws different cases at different random positions',()=>{expect(randomCase(0)).not.toBe(randomCase(.9));expect(randomCase(.35)).toBe('driver-negative');});
+it('continues selected mode and journey without redrawing or crossing saves',()=>{const data:Record<string,string>={[entryKey('doctor','gauntlet')]:'alk-positive'};const storage={getItem:(k:string)=>data[k]??null};expect(savedEntry(storage,'doctor','gauntlet')).toBe('alk-positive');expect(savedEntry(storage,'patient','gauntlet')).toBeUndefined();expect(savedEntry(storage,'doctor','challenge')).toBeUndefined();});
+it('keeps legacy case progress and prefers campaign active patient',()=>{const data:Record<string,string>={'oncolife-v3-doctor-challenge-recurrent':JSON.stringify(initialV03('doctor','challenge','recurrent'))};const storage={getItem:(k:string)=>data[k]??null};expect(savedEntry(storage,'doctor','challenge')).toBe('recurrent');data['oncolife-v3-campaign-doctor']=JSON.stringify({journey:'doctor',activeId:'small-cell',patients:{'small-cell':{}}});expect(savedEntry(storage,'doctor','challenge')).toBe('small-cell');});
