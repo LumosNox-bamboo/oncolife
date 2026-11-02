@@ -15,7 +15,7 @@ it('CT does not unlock brain MRI, molecular evidence or final stage',()=>{
 });
 it('legacy completed report gains detailed display without changing saved values or finances',()=>{
  const s=initialV03();const o={id:'ord-1',testId:'ct',caseId:s.caseId,status:'completed' as const,orderedAt:1,scheduledAt:1,availableAt:2,completedAt:2,transactionId:'charge:ord-1',result:'影像显示目标病灶及需进一步评估的范围。'};
- const before=JSON.stringify(o);expect(orderResult(o)).toContain('3.6 cm');expect(orderResult(o)).toContain('未重新采样');expect(JSON.stringify(o)).toBe(before);expect(orderResult({...o,status:'failed'})).toBe('');
+ const before=JSON.stringify(o);expect(orderResult(o)).toContain('3.6 cm');expect(orderResult(o)).not.toContain('资料补充');expect(JSON.stringify(o)).toBe(before);expect(orderResult({...o,status:'failed'})).toBe('');
 });
 it('six profiles contain distinct concrete findings and recorded uncertainty',()=>{
  for(const id of Object.keys(cases) as CaseId[]){const p=profiles[id];expect(p.vitals).toMatch(/mmHg/);expect(p.provenance).toContain('虚构');expect(caseReport(id,'ct')).toMatch(/\d+\.\d/);expect(caseReport(id,'pathology')).toMatch(/腺癌|非小细胞癌|小细胞/);expect(p.labs.crcl).toBeGreaterThan(0);}
@@ -27,4 +27,9 @@ it('unoccurred acute data stays hidden and historical precheck numbers are not r
 });
 it('reading one blood report does not reveal later unacknowledged blood reports',()=>{
  let s=run(initialV03(),{type:'order',testId:'blood'});s=run(s,{type:'advance',days:'next'});s=run(s,{type:'ack',id:s.events[0].id});s.orders.push({...s.orders[0],id:'later',result:'尚未查看的新数值'});expect(clinicalRecord(s).reports).toHaveLength(1);
+});
+
+it('old saved reports display clinical findings without rewriting their stored values',()=>{
+ const o={id:'precheck:1:1',testId:'blood',caseId:'driver-negative' as const,status:'completed' as const,orderedAt:1,scheduledAt:1,availableAt:1,transactionId:'test',reportContentVersion:1,result:'ANC 1.9×10⁹/L；CrCl 61 mL/min。固定教学样本值，不代表真实检测或恢复速度。'};
+ const original=JSON.stringify(o);expect(orderResult(o)).toBe('ANC 1.9×10⁹/L；CrCl 61 mL/min。');expect(JSON.stringify(o)).toBe(original);
 });

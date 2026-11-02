@@ -11,7 +11,7 @@ it('does not charge dependent or unaffordable orders and explains individual res
  let s=initialV03('doctor','challenge');s.balance=500;s=run(s,{type:'orderBatch',testIds:['pathology','molecular','ct','blood']});
  expect(s.orders.map(o=>o.testId)).toEqual(['ct']);expect(s.balance).toBe(100);expect(s.message).toContain('可用组织');expect(s.message).toContain('预算不足');
 });
-it('patient cannot open a batch; supplementary specimens are distinct and explicitly fictional',()=>{
+it('patient cannot open a batch; supplementary specimens retain distinct values',()=>{
  const s=run(initialV03('patient'),{type:'orderBatch',testIds:['blood']});expect(s.orders).toHaveLength(0);
- expect(caseReport('frail-elderly','electrolytes')).toContain('4.8');expect(caseReport('driver-negative','electrolytes')).toContain('4.1');expect(caseReport('small-cell','ecg')).toContain('虚构');
+ expect(caseReport('frail-elderly','electrolytes')).toContain('4.8');expect(caseReport('driver-negative','electrolytes')).toContain('4.1');expect(caseReport('small-cell','ecg')).toContain('QTc 445 ms');
 });

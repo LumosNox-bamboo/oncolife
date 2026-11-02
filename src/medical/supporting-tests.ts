@@ -18,4 +18,4 @@ const values:Record<CaseId,number[]>={
  'frail-elderly':[34,36,16,135,4.8,1.1,32,452],
  oligometastatic:[22,23,11,140,4.2,1.0,28,418]
 };
-export function supportingResult(id:CaseId,testId:string){const [alt,ast,bili,na,k,inr,aptt,qtc]=values[id];const report:Record<string,string>={liver:`ALT ${alt} U/L；AST ${ast} U/L；总胆红素 ${bili} μmol/L。`,electrolytes:`血钠 ${na} mmol/L；血钾 ${k} mmol/L。`,coagulation:`INR ${inr.toFixed(1)}；APTT ${aptt} 秒。`,ecg:`本次静息记录为窦性心律，QTc ${qtc} ms；既往间歇性心律异常不能由单次记录排除。`};return report[testId]?report[testId]+' 新增虚构教学样本；参考区间依实验室／方法而异，结果需临床解读，不自动视为治疗许可。':null;}
+export function supportingResult(id:CaseId,testId:string){const [alt,ast,bili,na,k,inr,aptt,qtc]=values[id];const report:Record<string,string>={liver:`ALT ${alt} U/L；AST ${ast} U/L；总胆红素 ${bili} μmol/L。`,electrolytes:`血钠 ${na} mmol/L；血钾 ${k} mmol/L。`,coagulation:`INR ${inr.toFixed(1)}；APTT ${aptt} 秒。`,ecg:`本次静息记录为窦性心律，QTc ${qtc} ms；既往间歇性心律异常不能由单次记录排除。`};return report[testId]?report[testId]+'':null;}

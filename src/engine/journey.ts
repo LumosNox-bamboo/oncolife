@@ -38,7 +38,7 @@ export function command(before:JourneyState,c:Command):JourneyState{
  if(s.journey!=='doctor')return fail('患者可描述症状，不能执行医生问诊权限。');const q=interview.find(x=>x.id===c.id);if(!q)return fail('未知问诊项目。');if(done(s,q.id))return {...s,message:'这条线索已记录，可隐藏已读问答。'};mark(s,q.id);s.clues.push(q.text);return record(s,before,q.label,q.text);
  }
  if(c.type==='order'){
- const reason=orderBlock(s,c.id);if(reason)return fail(reason);if(!placeOrder(s,c.id))return fail('预算不足。大厅可申请一次教学援助。');s.phase='检查与等待';return record(s,before,(s.journey==='patient'?'参与 NPC 评估后的检查：':'申请：')+testById(c.id).name,`已安排，等待 ${testById(c.id).days} 天。费用 ${testById(c.id).cost} 虚构游戏币。检查结果不会提前揭示。`,'ng122');
+ const reason=orderBlock(s,c.id);if(reason)return fail(reason);if(!placeOrder(s,c.id))return fail('预算不足。大厅可申请一次援助。');s.phase='检查与等待';return record(s,before,(s.journey==='patient'?'参与 NPC 评估后的检查：':'申请：')+testById(c.id).name,`已安排，等待 ${testById(c.id).days} 天。费用 ${testById(c.id).cost} 游戏币。检查结果不会提前揭示。`,'ng122');
  }
  if(c.type==='hypothesis'){
  if(s.journey!=='doctor')return fail('患者不能替医生提交临床诊断。');if(s.plan)return fail('已进入治疗阶段；本章保留已确认诊断，新的诊断问题需另行会诊。');s.hypothesis={...c.value,reason:c.value.reason.slice(0,800)};
@@ -46,7 +46,7 @@ export function command(before:JourneyState,c:Command):JourneyState{
  s.flags=s.flags.filter(f=>f!=='diagnosis');
  if(!resultReady(s,'pathology')||!resultReady(s,'pleura')||!s.orders.find(o=>o.id==='pathology')?.result?.includes('检出腺癌'))return fail('当前证据不足以确认组织类型与胸膜性质。请考虑标本质量及病理结果；不会替你填写诊断。');
  if(!resultReady(s,'brain'))return fail('需要补充颅内分期评估。分型、分期和分子特征是不同问题。');
- if(c.value.disease!=='肺腺癌'||c.value.stage!=='IVA')return fail('提交与现有证据不一致。重新阅读组织来源、胸膜性质与分期卡；修订不会造成虚构的严重后果。');
+ if(c.value.disease!=='肺腺癌'||c.value.stage!=='IVA')return fail('提交与现有证据不一致。重新阅读组织来源、胸膜性质与分期卡。');
  if(!s.hypothesis.reason.trim())return fail('请写下支持诊断与分期的证据。');mark(s,'diagnosis');s.phase='共同决策';return record(s,before,'提交诊断',`你的判断与已获得证据一致：${c.value.disease}、${c.value.stage}。分子检测仍独立决定后续可讨论的系统治疗选项。`);
  }
  const id=c.id;
@@ -56,7 +56,7 @@ export function command(before:JourneyState,c:Command):JourneyState{
  if(done(s,id)&&!['clarify','assess'].includes(id))return {...s,message:'已完成这项选择，可直接跳过已读内容。'};
  let text='',source='nci';
  switch(id){
- case 'aid':if(done(s,'aid'))return fail('援助仅一次。');s.budget+=3000;text='社工协助申请 3000 虚构游戏币教学援助。';break;
+ case 'aid':if(done(s,'aid'))return fail('援助仅一次。');s.budget+=3000;text='社工协助申请 3000 游戏币教学援助。';break;
  case 'visit':mark(s,'visit');s.phase='首次就医';text='医生 NPC：“请具体说说何时开始、有什么变化。先查原因，不先下结论。”';break;
  case 'delayVisit':if(done(s,'visit'))return fail('已经就医，不再回到就医前。');s.day+=2;change(s,'calm',5);change(s,'pressure',-3);text='先安排家里的照护，两天后再就医。只增加等待，不模拟肿瘤进展或惩罚性死亡。';break;
  case 'describeFull':case 'describeBrief':
@@ -67,7 +67,7 @@ export function command(before:JourneyState,c:Command):JourneyState{
  case 'family':case 'private':if(done(s,'family')||done(s,'private'))return fail('本次沟通方式已选择，后续仍可接受支持。');change(s,'calm',id==='family'?12:5);change(s,'quality',id==='family'?6:2);text=id==='family'?'你告诉姐姐还没有确定诊断，她答应陪同检查；之后可选家属陪诊路径。':'你先独自整理信息，保留隐私；之后仍可向社工求助。';break;
  case 'communicate':
  if(!resultReady(s,'pathology')||!resultReady(s,'pleura')||!s.orders.find(o=>o.id==='pathology')?.result?.includes('检出腺癌')||!resultReady(s,'brain'))return fail('医生 NPC 不会在证据不足时宣布确诊。请完成取材、病理与分期评估。');mark(s,'diagnosis');s.phase='诊断沟通';change(s,'calm',-12);text='医生 NPC 用已取得的病理与影像解释：肺腺癌伴胸膜转移，IVA 期。你听到诊断后沉默了，可以先问目标，也可以问治疗怎样影响生活。';break;
- case 'askGoal':case 'askBurden':if(!done(s,'diagnosis'))return fail('先与医生沟通现有结果。');change(s,'calm',8);text=id==='askGoal'?'医生：“系统治疗主要希望控制疾病和改善症状，不能承诺治愈或生存时长。你可以参与每一步决定。”':'护士解释等待、疲劳、监测与交通安排。费用只是虚构游戏币，不是实际收费。你可以请求家属或社工支持。';break;
+ case 'askGoal':case 'askBurden':if(!done(s,'diagnosis'))return fail('先与医生沟通现有结果。');change(s,'calm',8);text=id==='askGoal'?'医生：“系统治疗主要希望控制疾病和改善症状，我们一起商量每一步怎么走。”':'护士解释等待、疲劳、监测与交通安排。你可以请求家属或社工支持。';break;
  case 'discuss':if(!done(s,'diagnosis'))return fail('先提交基于证据的诊断。');text='患者 NPC：“希望兼顾生活质量。了解免疫联合等选项后，我暂不接受免疫治疗；也想知道先做支持照护意味着什么。”';break;
  case 'chemo':case 'support':
  if(!done(s,'diagnosis')||!resultReady(s,'molecular')||!resultReady(s,'blood'))return fail('治疗决策需要诊断、分子信息和基础安全评估。');
@@ -94,7 +94,7 @@ export function command(before:JourneyState,c:Command):JourneyState{
  if(!pay(s,id==='callFamily'?950:850))return fail('预算不足，可领取援助。');s.recoveryDay=s.day+2;change(s,'calm',12);text=id==='callTeam'?'你向护士清楚报告发热与乏力。医生 NPC 立即评估并启动紧急检查和治疗，不由你开药。':'姐姐陪你立即联系急诊，未因等家人而延迟医疗；医生 NPC 启动紧急处理。你不必独自承担。';source='nice';break;
  case 'finishClinical':case 'finishImage':
  if(!s.resolved)return fail('需要完成本阶段安全与症状复评。');if(id==='finishImage'&&!resultReady(s,'followct'))return fail('选择影像复评需先申请并等待报告。');s.complete=true;s.phase='阶段结局';text=id==='finishClinical'?'你完成以症状、毒性和患者意愿为重点的首次复诊，并安排后续影像；没有强行把一次提前 CT 当作必经任务。':'你综合了影像、症状、毒性与意愿，完成首次复诊。微小尺寸变化不等于客观缓解。';text+=' 后续治疗保持复评，不自动执行下一周期。';break;
- case 'diaryEnd':if(!s.resolved||!done(s,'rest')&&!done(s,'accompanied'))return fail('先完成本阶段复查和生活安排。');s.complete=true;s.phase='我的下一步';text=done(s,'family')?'姐姐记下了下次预约，你写下：我可以提问，也可以求助。阶段结束不意味着治愈，生活仍由自己参与安排。':'你在日记写下：独立不等于独自承受。我学会报告症状，也为自己安排了支持与复评。';break;
+ case 'diaryEnd':if(!s.resolved||!done(s,'rest')&&!done(s,'accompanied'))return fail('先完成本阶段复查和生活安排。');s.complete=true;s.phase='我的下一步';text=done(s,'family')?'姐姐记下了下次预约，你写下：我可以提问，也可以求助。下次复诊前，先把生活安排好。':'你在日记写下：独立不等于独自承受。我学会报告症状，也为自己安排了支持与复评。';break;
  default:return fail('未知行动。');
  }
  mark(s,id);return record(s,before,id,text,source);

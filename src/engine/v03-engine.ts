@@ -21,8 +21,8 @@ function sync(s:GameState){
   if(s.day>=o.scheduledAt){o.collectedAt??=o.scheduledAt;o.status='processing';}
   if(s.day<o.availableAt)continue;
   o.completedAt=o.availableAt;
-  if(o.testId==='needle'&&!o.attempt){o.status='insufficient_sample';o.failureReason='固定教学剧情：样本不足，不代表真实失败率。';}
-  else if(o.testId==='molecular'&&s.mode==='challenge'&&!o.attempt){o.status='failed';o.failureReason='固定教学剧情：实验室技术失败，可免费重做或全额退款。';}
+  if(o.testId==='needle'&&!o.attempt){o.status='insufficient_sample';o.failureReason='标本量不足，需重新取样。';}
+  else if(o.testId==='molecular'&&s.mode==='challenge'&&!o.attempt){o.status='failed';o.failureReason='实验室技术失败，可免费重做或全额退款。';}
   else {o.status='completed';o.result=caseReport(s.caseId,o.testId)||testInfo[o.testId].result;o.reportContentVersion=1;}
  }
  const e=nextEvent(s);return say(s,e?`第 ${s.day} 天：${e.availableAt<=s.day?'待处理':'下次预约'} · ${e.title}`:'暂无未处理预约，请继续决策。','推进临床时间');
@@ -43,7 +43,7 @@ export function run(before:GameState,c:Command):GameState{
   if(['administration','assessment','adverse','finance'].includes(e.kind))return say(s,'这项事件需要实际临床操作，不能只点确认完成。');
   s=acknowledge(s,c.id);
   if(e.kind==='monitor')mark(s,'monitor:'+e.id);
-  if(e.id==='surveillance'){s.complete=true;s.phase='阶段结局';s.outcome=s.journey==='patient'?'我的治疗阶段完成了：学会描述症状、寻求帮助、安排生活并参与复诊。仍需后续随访，这不是治愈证明。':'完成预设治疗与随访沟通，进入后续管理；不代表治愈或真实疗效。';s.score.communication+=5;}
+  if(e.id==='surveillance'){s.complete=true;s.phase='阶段结局';s.outcome=s.journey==='patient'?'我的治疗阶段完成了：学会描述症状、寻求帮助、安排生活并参与复诊。已约好下次随访。':'本阶段治疗与复诊已完成，继续按计划随访。';s.score.communication+=5;}
   if(s.journey==='patient'&&eligible(s)){mark(s,'diagnosis');s.phase='诊断沟通';}
   return say(s,`已查看：${e.title}`,'查看事件',e.kind==='report'?'ng122':'教学规则');
  }
@@ -64,18 +64,18 @@ export function run(before:GameState,c:Command):GameState{
   const o=s.orders.find(x=>x.id===c.orderId);if(!o)return say(s,'订单不存在。');
   if(c.action==='cancel'){
    if(!['ordered','scheduled'].includes(o.status))return say(s,'已执行，不能按未执行取消规则退款。');
-   done(s,`report:${o.id}:${o.attempt||0}`);o.status='cancelled';s=refund(s,o,costs[o.testId]*.8,'未执行取消：80% 教学退款');return say(s,'已取消；保留 20% 教学预约成本，其余退回。','撤销订单');
+   done(s,`report:${o.id}:${o.attempt||0}`);o.status='cancelled';s=refund(s,o,costs[o.testId]*.8,'未执行取消：退还 80%');return say(s,'已取消；保留 20% 预约费用，其余退回。','撤销订单');
   }
   if(!['failed','insufficient_sample','recollection_required'].includes(o.status))return say(s,'当前状态不能退款或重做。');
   if(c.action==='refund'){
-   if(o.status!=='failed')return say(s,'样本不足已发生取材成本：本教学规则不退费，可重新取样。');
+   if(o.status!=='failed')return say(s,'样本不足已发生取材成本：取材费用已结算，可重新取样。');
    done(s,`report:${o.id}:${o.attempt||0}`);s=refund(s,o,costs[o.testId],'实验室技术失败：全额退款');return say(s,'技术失败已退款；原失败状态保留，财务状态独立记录。','退款');
   }
   if(o.refundTransactionId)return say(s,'已退款订单不能免费重做，请重新申请。');
   done(s,`report:${o.id}:${o.attempt||0}`);
   if(o.status==='insufficient_sample'){
    if(s.mode!=='learning'&&s.balance<100)return say(s,'补样需 100 游戏币，可申请援助。');
-   s=charge(s,`recollect:${o.id}`,100,'重新取样：额外教学成本',o.id);
+   s=charge(s,`recollect:${o.id}`,100,'重新取样费用',o.id);
   }
   const retry=s.orders.find(x=>x.id===o.id)!;retry.attempt=(retry.attempt||0)+1;retry.status='scheduled';retry.scheduledAt=s.day;retry.availableAt=s.day+testInfo[o.testId].days;delete retry.failureReason;delete retry.completedAt;
   event(s,`report:${o.id}:${retry.attempt}`,'report',retry.availableAt,`重做报告：${testInfo[o.testId].name}`,2);
@@ -101,7 +101,7 @@ export function run(before:GameState,c:Command):GameState{
  }
  if(c.type==='therapy'){if(s.journey==='patient'&&c.action==='support')mark(s,'goal');return therapy(s,c.action);}
  if(c.type==='challenge'){
-  if(c.action==='aid'){if(s.flags.includes('aid'))return say(s,'本次援助已领取。');mark(s,'aid');s.balance+=1500;return say(s,'获得一次教学援助 1500 游戏币。','经济援助');}
+  if(c.action==='aid'){if(s.flags.includes('aid'))return say(s,'本次援助已领取。');mark(s,'aid');s.balance+=1500;return say(s,'获得一次援助 1500 游戏币。','经济援助');}
   if(c.action==='transfer'){if(unresolved(s))return say(s,'急性事件需要立即处理，不能通过延迟转诊跳过。');s=advanceClock(s,s.day+1);mark(s,'transfer');return say(s,'已协调外院非紧急评估，等待一天；本院预约仍保留。','转诊');}
   if(s.resources.urgentSlots<1)return say(s,'本日唯一加急设备已被另一预约占用。紧急救治仍可直接启动。','资源冲突');
   s.resources.urgentSlots--;return say(s,'本日唯一加急影像名额已预留；同日不能再占用。','资源决策');
@@ -136,7 +136,7 @@ function admission(s:GameState,a:'request'|'admit'|'assess'|'discharge'){
  if(a==='request'){if(s.admissions.some(x=>x.status!=='discharged'))return say(s,'已有住院申请。');s.admissions.push({id:`adm-${s.admissions.length+1}`,status:'requested',requestedAt:s.day,reason:cases[s.caseId].admissionReason,notes:[]});return say(s,'已申请住院评估；门诊治疗不会自动住院。');}
  const adm=s.admissions.at(-1);if(!adm)return say(s,'先申请住院。');
  if(a==='admit'){if(adm.status!=='requested'||s.resources.beds<1)return say(s,'状态或床位不足，不能办理入院。');s.resources.beds--;adm.status='admitted';adm.admittedAt=s.day;adm.bed='B1';event(s,'admission:'+adm.id,'admission',s.day,'入院评估与床位 B1',1);return say(s,'已入院，请完成床旁评估。');}
- if(a==='assess'){if(adm.status!=='admitted')return say(s,'尚未入院或已完成评估。');adm.status='observing';adm.notes.push('入院症状、用药及护理评估完成；治疗前检查仍需另行复核');done(s,'admission:'+adm.id);return say(s,'已完成入院评估，进入观察；尚不代表满足给药条件，请按治疗预约完成当日安全复核。');}
+ if(a==='assess'){if(adm.status!=='admitted')return say(s,'尚未入院或已完成评估。');adm.status='observing';adm.notes.push('入院症状、用药及护理评估完成；治疗前检查仍需另行复核');done(s,'admission:'+adm.id);return say(s,'已完成入院评估，进入观察。请按治疗预约完成当日安全复核。');}
  if(adm.status!=='observing'||unresolved(s))return say(s,'需要完成入院评估，且急性事件未处理时不能出院。');
  adm.status='discharged';adm.dischargedAt=s.day;adm.notes.push('出院评估完成；继续原预约与出院复查');s.resources.beds++;event(s,'discharge:'+adm.id,'discharge',s.day,'出院记录',2);event(s,'post-discharge:'+adm.id,'appointment',s.day+3,'出院后复查',3);return say(s,'出院时间与复查已记录。');
 }
@@ -150,7 +150,7 @@ function therapy(s:GameState,a:Extract<Command,{type:'therapy'}>['action']){
   for(const x of s.therapy.administrations)event(s,`admin:${x.cycle}:${x.day}`,'administration',x.scheduledAt,`第 ${x.cycle} 周期：治疗节点（需安全复核）`,2);
   for(const x of s.therapy.assessments)event(s,`assessment:${x.cycle}`,'assessment',x.scheduledAt,`第 ${x.cycle} 周期综合评估`,3);
   if(s.mode==='challenge'){const delay=teachingDraw(s.seed)<.5?2:4;event(s,'logistics','finance',s.day+delay,'交通安排临时变化：选择陪诊或公共交通',4);}
-  s.phase='治疗准备';return say(s,`建立 ${r.name}。${r.cycles} 个教学周期；治疗日程与必要监测见预约。非验证方案不输出实际处方。`,'共同治疗决策',r.source);
+  s.phase='治疗准备';return say(s,`建立 ${r.name}。${r.cycles} 个周期；治疗与复查时间已列入预约。`,'共同治疗决策',r.source);
  }
  const t=s.therapy;if(!t)return say(s,'尚未建立治疗计划。');
  const next=t.administrations.find(x=>x.status!=='given');
@@ -160,8 +160,8 @@ function therapy(s:GameState,a:Extract<Command,{type:'therapy'}>['action']){
   const id=`precheck:${next.cycle}:${s.day}`;
   if(!s.orders.some(o=>o.id===id)){
    if(s.mode!=='learning'&&s.balance<120)return say(s,'当日复查需 120 游戏币，预算不足可申请援助。');
-   s=charge(s,`charge:${id}`,120,'治疗日血液／肾功能复查（教学即时出报告）',id);
-   s.orders.push({id,caseId:s.caseId,testId:'blood',status:'completed',orderedAt:s.day,scheduledAt:s.day,collectedAt:s.day,availableAt:s.day,completedAt:s.day,transactionId:`charge:${id}`,result:'当日复查（虚构教学样本）：'+labText(s.caseId),reportContentVersion:1});
+   s=charge(s,`charge:${id}`,120,'治疗日血液／肾功能复查',id);
+   s.orders.push({id,caseId:s.caseId,testId:'blood',status:'completed',orderedAt:s.day,scheduledAt:s.day,collectedAt:s.day,availableAt:s.day,completedAt:s.day,transactionId:`charge:${id}`,result:'当日复查：'+labText(s.caseId),reportContentVersion:1});
    event(s,`report:${id}:0`,'report',s.day,'治疗日复查与核对',1);done(s,`report:${id}:0`);
   }
   const lab=profiles[s.caseId].labs;
@@ -174,10 +174,10 @@ function therapy(s:GameState,a:Extract<Command,{type:'therapy'}>['action']){
   if(s.day<next.scheduledAt||unresolved(s)||!s.flags.includes('prepared:'+next.cycle+':'+s.day)){s.score.safety=Math.max(0,s.score.safety-3);return say(s,'尚未到治疗日，或安全复核／急性事件未完成。安全评价降低，可补齐评估后重试。','安全阻断','label');}
   if(s.events.some(e=>e.kind==='assessment'&&e.availableAt<s.day&&e.completedAt===undefined))return say(s,'先完成前一周期评估。');
   if(s.mode==='challenge'&&s.resources.infusionSlots<1)return say(s,'本日治疗资源已占用。');
-  if(s.mode!=='learning'&&s.balance<350)return say(s,'治疗教学费用 350，预算不足，可援助或转诊。');
+  if(s.mode!=='learning'&&s.balance<350)return say(s,'治疗费用 350，预算不足，可援助或转诊。');
   const cycle=next.cycle,day=next.day;s=charge(s,`treatment:${cycle}:${day}`,350,'治疗节点（游戏费用）');
   const tx=s.therapy!;tx.administrations.find(x=>x.cycle===cycle&&x.day===day)!.status='given';tx.currentCycle=cycle;done(s,`admin:${cycle}:${day}`);s.resources.infusionSlots--;s.phase='治疗与监测';s.score.time+=s.day===next.scheduledAt?2:0;s.experience.fatigue+=5;
-  if(cycle===1&&s.caseId==='driver-negative')event(s,'acute','adverse',s.day+7,'治疗后发热与异常血细胞（固定教学剧情）',0);
+  if(cycle===1&&s.caseId==='driver-negative')event(s,'acute','adverse',s.day+7,'治疗后发热与异常血细胞',0);
   for(const d of r.monitoringDays.filter(d=>d>1))event(s,`monitor:${cycle}:${d}`,'monitor',s.day+d-1,`第 ${cycle} 周期第 ${d} 天监测`,1);
   return say(s,`第 ${cycle} 周期治疗节点已执行；首剂不会结束游戏。`,'执行治疗',r.source);
  }

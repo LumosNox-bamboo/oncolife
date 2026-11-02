@@ -59,7 +59,7 @@ test('普通医生模式交错接诊与住院区分',async({page})=>{
  await start(page);await expect(page.getByLabel('当前患者')).toBeVisible();await go(page,'lab');await button(page,'申请增强 CT').click();await close(page);
  await button(page,'接诊下一位').click();const nextId=await page.getByLabel('当前患者').inputValue();expect(nextId).not.toBe('driver-negative');await expect(page.locator('.status')).toContainText('门诊评估 · 未住院');
  await button(page,'＋1 天').click();await expect(page.locator('.toast')).toContainText('林晓禾');await page.getByLabel('当前患者').selectOption('driver-negative');await confirmReports(page);
- await go(page,'ward');await expect(page.getByRole('dialog')).toContainText('入院评估不能替代每周期治疗前安全复核');await close(page);
+ await go(page,'ward');await expect(page.getByRole('dialog')).toContainText('每周期治疗前仍需完成安全复核');await close(page);
  await page.reload();await page.getByRole('button',{name:/医生模式 Clinical/}).click();await expect(page.getByLabel('当前患者')).toBeVisible();await page.getByLabel('当前患者').selectOption(nextId);expect((await state(page,'doctor','learning',nextId)).day).toBe(2);
  await page.screenshot({path:'docs/v03-multi-clinic.png',fullPage:true});
 });
@@ -91,4 +91,11 @@ test('小科室：接诊、等待时换患者、下班买沙发及第二天读�
  await page.reload();await button(page,'我的小科室 · 上班啦').click();expect((await pool()).week.funds).toBe(50);await page.getByLabel('当前患者').selectOption('driver-negative');await confirmReports(page);
  await close(page);await button(page,'我的科室 · 下班 / 买家具').click();await button(page,'下班，明天再来').click();expect((await pool()).day).toBe(3);
  await page.setViewportSize({width:390,height:844});await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);await page.screenshot({path:'docs/clinic-life-evening.png',fullPage:true});expect(errors).toEqual([]);
+});
+test('病历报告保留数值，模拟说明集中到关于游戏，旧存档显示也更新',async({page})=>{
+ await start(page);await go(page,'clinic');await expect(page.getByRole('region',{name:'结构化病历'})).not.toContainText('虚构');await button(page,'既往史与用药').click();await expect(page.getByRole('dialog')).toContainText('过敏史未记录');
+ await order(page,'血常规与肾功能');await expect(page.getByRole('dialog')).toContainText('3.2×10');await expect(page.getByRole('dialog')).not.toContainText('教学样本');
+ await page.evaluate(()=>{const key='oncolife-v3-campaign-doctor-learning';const c=JSON.parse(localStorage.getItem(key)!);c.patients['driver-negative'].orders[0].result='ANC 1.9×10⁹/L；CrCl 61 mL/min。固定教学样本值，不代表真实检测或恢复速度。';c.patients['driver-negative'].message='固定教学剧情：样本不足，不代表真实失败率。';localStorage.setItem(key,JSON.stringify(c));});
+ await page.reload();await page.getByRole('button',{name:/医生模式 Clinical/}).click();await go(page,'lab');await expect(page.getByRole('dialog')).toContainText('ANC 1.9');await expect(page.getByRole('dialog')).not.toContainText('不代表真实');await page.screenshot({path:'docs/natural-report.png',fullPage:true});
+ await close(page);await button(page,'关于游戏').click();await expect(page.getByRole('dialog')).toContainText('编写的虚构病例');await expect(page.getByRole('dialog')).toContainText('辅助检查数值尚未接入自动给药判断');
 });
