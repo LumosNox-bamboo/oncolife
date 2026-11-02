@@ -39,3 +39,5 @@ small,.brand small{color:#536e55}.eyebrow{color:#536e55}.brand b{font-family:mon
 @media(prefers-reduced-motion:reduce){button:active:not(:disabled){transform:none}}
 
 .batch-orders{border:2px solid #557b69;padding:12px;margin:12px 0;background:#dfe6c7}.batch-orders button{margin:8px}.testcard input[type=checkbox]{accent-color:#557b69;width:18px;height:18px;vertical-align:middle}.toast,.feedback{white-space:pre-line}
+
+.week-strip,.week-stats{display:flex;gap:12px;flex-wrap:wrap;align-items:center;padding:10px;background:#e3e9c8;border:2px solid #557b69;margin-top:14px}.week-entry{width:100%;padding:14px;background:#d6e7b8;font-weight:bold}.week-stats span{background:#fff6d8;padding:4px 8px;border:1px solid #94a37e}.modal>progress{width:100%;accent-color:#557b69;margin:12px 0}

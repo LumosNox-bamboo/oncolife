@@ -7,6 +7,7 @@ export const controls={x:0,y:0,interact:false};
 export class Hospital extends Phaser.Scene{
  px=350;py=325;keys!:Record<string,Phaser.Input.Keyboard.Key>;avatar!:Phaser.GameObjects.Container;hint!:Phaser.GameObjects.Text;walking=0;lastRoom='';
  patientMarker!:Phaser.GameObjects.Text;
+ weekSign!:Phaser.GameObjects.Text;weekDecor!:Phaser.GameObjects.Graphics;weekLook='';
  route:{x:number;y:number}[]=[];
  travel(id:string,walk=false){const target=destinations[id];if(!target)return;useGame.getState().open(null);if(walk){this.route=findPath({x:this.px,y:this.py},target);useGame.setState({notice:this.route.length?'正在自动寻路；方向键可取消':'路线不可达，请使用快速旅行'});}else{this.route=[];this.px=target.x;this.py=target.y;useGame.getState().setRoom(roomAt(this.px,this.py));}}
  constructor(){super('hospital');}
@@ -32,6 +33,7 @@ export class Hospital extends Phaser.Scene{
  this.add.text(x,y+39,o.label,{fontSize:'12px',color:'#395e56',backgroundColor:'#ffffffa0',padding:{x:4,y:3}}).setOrigin(.5);
  this.add.zone(x,y,88,90).setInteractive({useHandCursor:true}).on('pointerdown',()=>{if(Math.hypot(this.px-x,this.py-y)<100)useGame.getState().open(o.id);else useGame.setState({notice:'请先走近目标，再点击或按 E 互动。'});});
  });
+ this.weekDecor=this.add.graphics().setDepth(3);this.weekSign=this.add.text(535,255,'',{fontSize:'12px',color:'#315b43',backgroundColor:'#f5f1d4',padding:{x:5,y:4}}).setDepth(4).setInteractive({useHandCursor:true}).on('pointerdown',()=>{if(!useGame.getState().menu)useGame.getState().open('week');});
  this.patientMarker=this.add.text(220,180,'',{fontSize:'12px',color:'#305d47',backgroundColor:'#faffed',padding:{x:4,y:3}}).setDepth(12);
  this.npc(575,330,0xe2efef);this.npc(255,470,0x8cb3bd);
  const shadow=this.add.ellipse(0,7,24,9,0x456858,.25);const body=this.add.rectangle(0,-7,16,21,0xf7faf0);const head=this.add.rectangle(0,-26,14,14,0xe8bf99);const hair=this.add.rectangle(0,-33,16,6,0x4d5045);const leg1=this.add.rectangle(-5,7,5,11,0x455f6c);const leg2=this.add.rectangle(5,7,5,11,0x455f6c);const cross=this.add.text(-4,-16,'+',{fontSize:'12px',color:'#cf7966'});
@@ -44,7 +46,7 @@ export class Hospital extends Phaser.Scene{
  interact(){const nearest=objects.find(o=>Math.hypot(o.x-this.px,o.y-this.py)<88);if(nearest)useGame.getState().open(nearest.id);}
  npc(x:number,y:number,color:number){const g=this.add.graphics();g.fillStyle(0x57746b).fillRect(x-7,y+8,5,12).fillRect(x+2,y+8,5,12);g.fillStyle(color).fillRect(x-10,y-10,20,22);g.fillStyle(0xe4bc99).fillRect(x-7,y-24,14,14);g.fillStyle(0x555647).fillRect(x-8,y-27,16,6);}
  update(_:number,dt:number){
- if(!this.keys)return;const store=useGame.getState();const inpatient=store.state.admissions.some(a=>a.status==='admitted'||a.status==='observing');this.patientMarker.setPosition(175,inpatient?460:185).setText('● '+cases[store.state.caseId].title.split(' · ')[0]+' · '+(inpatient?'住院':'门诊'));if(store.panel||store.menu){this.route=[];controls.x=0;controls.y=0;controls.interact=false;return;}
+ if(!this.keys)return;const store=useGame.getState();const week=store.campaign?.week;this.weekSign.setVisible(!!week);if(week){this.weekSign.setText(`科室第 ${week.week} 周 · 纪念物 ${week.souvenirs.length} 件\n${week.upgrades.includes('nurse')?'协作护士已到岗':'新团队磨合中'} · 点击周记`);const look=week.upgrades.join(',')+week.souvenirs.length;if(look!==this.weekLook){this.weekLook=look;const g=this.weekDecor;g.clear();if(week.upgrades.includes('lounge')){g.fillStyle(0x739678).fillRect(640,340,35,20);g.fillStyle(0xd8e7b7).fillRect(640,336,35,8);g.fillStyle(0xa77c53).fillRect(680,341,22,19);g.fillStyle(0x68934f).fillRect(678,326,26,18);}if(week.upgrades.includes('planner')){g.fillStyle(0x947955).fillRect(530,450,55,38);g.fillStyle(0xf4efc8).fillRect(534,454,47,30);for(let i=0;i<3;i++)g.fillStyle(0x74987a).fillRect(538,459+i*7,34,3);}if(week.souvenirs.length){g.fillStyle(0xe3b65a).fillRect(540,493,12,14);g.fillStyle(0xb48c49).fillRect(537,507,18,4);}}}else{this.weekDecor.clear();this.weekLook='';}const inpatient=store.state.admissions.some(a=>a.status==='admitted'||a.status==='observing');this.patientMarker.setPosition(175,inpatient?460:185).setText('● '+cases[store.state.caseId].title.split(' · ')[0]+' · '+(inpatient?'住院':'门诊'));if(store.panel||store.menu){this.route=[];controls.x=0;controls.y=0;controls.interact=false;return;}
  let dx=Number(this.keys.D.isDown||this.keys.RIGHT.isDown)-Number(this.keys.A.isDown||this.keys.LEFT.isDown)+controls.x;let dy=Number(this.keys.S.isDown||this.keys.DOWN.isDown)-Number(this.keys.W.isDown||this.keys.UP.isDown)+controls.y;
  if(dx||dy)this.route=[];
  if(this.route.length){const p=this.route[0];if(Math.hypot(p.x-this.px,p.y-this.py)<4){this.route.shift();}else{dx=p.x-this.px;dy=p.y-this.py;}}

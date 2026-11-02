@@ -125,12 +125,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 6815,
+                  "duration": 6951,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-02T13:50:49.456Z",
+                  "startTime": "2026-11-02T16:52:15.120Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -159,12 +159,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 5509,
+                  "duration": 5437,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-02T13:50:57.015Z",
+                  "startTime": "2026-11-02T16:52:22.787Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -193,12 +193,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 6460,
+                  "duration": 6243,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-02T13:51:02.531Z",
+                  "startTime": "2026-11-02T16:52:28.231Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -227,12 +227,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 7146,
+                  "duration": 7265,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-02T13:51:08.999Z",
+                  "startTime": "2026-11-02T16:52:34.481Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -261,12 +261,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1287,
+                  "duration": 1246,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-02T13:51:16.152Z",
+                  "startTime": "2026-11-02T16:52:41.753Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -295,12 +295,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1933,
+                  "duration": 1901,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-02T13:51:17.446Z",
+                  "startTime": "2026-11-02T16:52:43.005Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -329,12 +329,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1343,
+                  "duration": 1302,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-02T13:51:19.386Z",
+                  "startTime": "2026-11-02T16:52:44.912Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -363,12 +363,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1066,
+                  "duration": 1060,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-02T13:51:20.735Z",
+                  "startTime": "2026-11-02T16:52:46.221Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -397,12 +397,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1074,
+                  "duration": 1065,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-02T13:51:21.808Z",
+                  "startTime": "2026-11-02T16:52:47.288Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -414,15 +414,49 @@
           "file": "playthrough.spec.ts",
           "line": 74,
           "column": 1
+        },
+        {
+          "title": "七天门诊周：院内工作、临床奖励、事件阻断、升级及下周恢复",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2946,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-02T16:52:48.358Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ab852d5c69103777c6b4-ce8126067e75035aefde",
+          "file": "playthrough.spec.ts",
+          "line": 81,
+          "column": 1
         }
       ]
     }
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-02T13:50:49.144Z",
-    "duration": 33902.861,
-    "expected": 9,
+    "startTime": "2026-11-02T16:52:14.738Z",
+    "duration": 36663.941999999995,
+    "expected": 10,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

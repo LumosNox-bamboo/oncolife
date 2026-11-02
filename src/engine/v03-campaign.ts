@@ -1,9 +1,10 @@
+import type {WeekState} from './clinic-week';
 import {cases} from '../medical/cases';
 import {CaseId,GameState,Journey,Mode} from './v03-types';
 import {initialV03,run,Command} from './v03-engine';
 import {nextEvent} from './v03-clock';
 export function nextPatientId(c:Campaign):CaseId|undefined{const ids=Object.keys(cases).filter(id=>!c.patients[id as CaseId]) as CaseId[];if(!ids.length)return undefined;let x=(c.day*2654435761+ids.length*97+Object.keys(c.patients).length*7919)>>>0;x^=x<<13;x^=x>>>17;x^=x<<5;return ids[(x>>>0)%ids.length];}
-export type Campaign={version:3;journey:Journey;activeId:CaseId;day:number;balance:number;resources:GameState['resources'];patients:Partial<Record<CaseId,GameState>>};
+export type Campaign={week?:WeekState;version:3;journey:Journey;activeId:CaseId;day:number;balance:number;resources:GameState['resources'];patients:Partial<Record<CaseId,GameState>>};
 export function campaign(journey:Journey,id:CaseId='driver-negative',mode:Mode='challenge',existing?:GameState):Campaign{const s=existing?structuredClone(existing):initialV03(journey,mode,id);return {version:3,journey,activeId:id,day:s.day,balance:s.balance,resources:{...s.resources},patients:{[id]:s}};}
 function shared(c:Campaign){for(const s of Object.values(c.patients)){s.balance=c.balance;s.day=c.day;s.clock.now=c.day;s.resources={...c.resources};}return c;}
 export function selectPatient(before:Campaign,id:CaseId):Campaign{if(before.activeId===id&&before.patients[id])return structuredClone(before);const c=structuredClone(before);c.activeId=id;c.patients[id]??=initialV03(c.journey,c.patients[before.activeId]!.mode,id);const current=c.patients[id]!;const e=nextEvent(current);current.message=`当前接诊：${cases[id].title.split(' · ')[0]}。${e&&e.availableAt<=c.day?'有待处理事件，请查看当前任务。':'可继续问诊、检查或按预约返院。'}`;return shared(c);}
